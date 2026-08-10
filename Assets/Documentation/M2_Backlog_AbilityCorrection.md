@@ -1,8 +1,9 @@
 # Client Milestone 2 Backlog — Ability System Correction
 
-**Depends on:** Milestone 1 foundation (done)  
+**Depends on:** Milestone 1 foundation (done) + Priority 2 (quality consumers, pooling, Addressables, content validator)  
 **Maps to:** Audit M1 / Phase 2 — Ability system correction  
-**Rule:** All new content goes into `Assets/Content/` ScriptableObjects. No new magic numbers in cast code.
+**Rule:** All new content goes into `Assets/Content/` ScriptableObjects. No new magic numbers in cast code.  
+**M2 hard rules:** Spawn ability/impact VFX via `AbilityVfxPool` or `PoolService` only. Heavy assets via Addressables Load→Release. Respect `MobileQualityRuntime`.
 
 ## Goal
 
@@ -25,7 +26,9 @@ Stretch (only if ahead): Gravity Well, Barrier Pulse.
 
 ### WP1 — Data & loadout model
 - [ ] Match loadout runtime object: 6× `UnitData` + 2× `ActiveAbilityDefinition`
-- [ ] Persist selected actives for the match (scriptable/runtime, not PlayerPrefs hacks)
+- [ ] Persist selected actives for the match via `ISaveService` / `SaveKeys` (not raw PlayerPrefs)
+- [ ] Subscribe new actives/passives to `GameplayEvents` where appropriate
+- [ ] Read ability/balance data from `GameServices.Instance.Config`
 - [ ] Mark catalog entries; set `implemented = true` as each ability ships
 
 ### WP2 — Pre-match UI
@@ -40,12 +43,13 @@ Stretch (only if ahead): Gravity Well, Barrier Pulse.
 - [ ] Unit passives continue via existing scripts
 
 ### WP4 — Implement 6 actives (read SO power/radius/cooldown)
-- [ ] Meteor Strike — readable AoE damage  
-- [ ] Frost Nova — AoE slow  
+- [ ] Meteor Strike — readable AoE damage (pooled VFX)  
+- [ ] Frost Nova — AoE slow (pooled VFX)  
 - [ ] Mana Surge — grant in-match mana (`ManaManager`)  
 - [ ] Radiant Cleanse — clear/debuff support (v1 simplified OK)  
 - [ ] Arcane Overclock — tower AS/damage buff window  
 - [ ] Execution Sigil — boss/single-target amp  
+- [ ] No combat hot-path Instantiate/Destroy for ability presentation  
 
 ### WP5 — QA gate
 - [ ] Ability checklist (cast, cooldown UI, no tower select required)

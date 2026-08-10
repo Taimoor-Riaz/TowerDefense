@@ -2,16 +2,14 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// In-match mana only. Wallet currencies (Gold/Gems/Water) live in CurrencyManager — do not conflate.
-/// Tunables prefer <see cref="GameBalanceConfig"/> under Assets/Content/Balance (also Resources fallback).
+/// In-match mana and summon cost (battle economy). Wallet currencies live in CurrencyManager.
+/// Balance values come from GameConfigRegistry → GameBalanceConfig (single source of truth).
 /// </summary>
 public class ManaManager : MonoBehaviour
 {
     public static ManaManager Instance { get; private set; }
     public static event Action<int> OnManaChanged;
     public static event Action<int> OnSummonCostChanged;
-
-    private const string BalanceResourceName = "GameBalanceConfig";
 
     [Header("Balance (config-first)")]
     [SerializeField] private GameBalanceConfig balanceConfig;
@@ -45,13 +43,8 @@ public class ManaManager : MonoBehaviour
         ResolveBalanceConfig();
         ApplyBalanceConfig();
 
-        // Match mana is independent of meta wallet Water (Option A / Day 3 clarity).
         SetManaInternal(startingMana, false);
-
         CurrentSummonCost = initialSummonCost;
-
-        if (CurrencyManager.Instance != null)
-            CurrencyManager.Instance.SetSummonCost(CurrentSummonCost);
 
         lastInspectorMana = currentMana;
         initialized = true;
@@ -62,7 +55,8 @@ public class ManaManager : MonoBehaviour
         if (balanceConfig != null)
             return;
 
-        balanceConfig = Resources.Load<GameBalanceConfig>(BalanceResourceName);
+        if (GameServices.Instance != null && GameServices.Instance.Config != null)
+            balanceConfig = GameServices.Instance.Config.GameBalance;
     }
 
     private void ApplyBalanceConfig()
@@ -140,7 +134,6 @@ public class ManaManager : MonoBehaviour
         currentMana = Mathf.Max(0, amount);
         lastInspectorMana = currentMana;
 
-        // Intentionally do NOT mirror mana into CurrencyManager.Water when isolated.
         if (!isolateManaFromWalletWater && CurrencyManager.Instance != null)
             CurrencyManager.Instance.SetWater(currentMana);
 
@@ -151,10 +144,6 @@ public class ManaManager : MonoBehaviour
     public void IncreaseSummonCost()
     {
         CurrentSummonCost += summonCostIncrease;
-
-        if (CurrencyManager.Instance != null)
-            CurrencyManager.Instance.SetSummonCost(CurrentSummonCost);
-
         OnSummonCostChanged?.Invoke(CurrentSummonCost);
     }
 }

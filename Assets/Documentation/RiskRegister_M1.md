@@ -7,7 +7,7 @@
 |----|------|------------|--------|------------|-------|
 | R1 | Ability rewrite (Option A globals) takes longer than estimated | Med | High | SO stubs + catalog already exist; quarantine done; implement cast service only — do not re-expand tower binding | Eng |
 | R2 | Dual EventSystem / AudioListener glitches with additive Hub↔Battle | Med | Med | Hub unloads while Battle loads; smoke after every SceneFlow change | Eng |
-| R3 | `GameBalanceConfig` Content vs Resources drift | Med | Low | Edit `Resources/GameBalanceConfig` for live values; keep Content copy in sync (documented) | Eng |
+| R3 | ~~Config Content vs Resources drift~~ | — | — | **Closed** — single `GameConfigRegistry`; Resources only holds registry | Eng |
 | R4 | Naming drift continues (Zeus/Princess folders) | Low | Med | NamingMap frozen; UI uses GDD names; folder renames deferred | Design+Eng |
 | R5 | Android device variance (low-end 30 FPS feel) | Med | Med | Quality tiers auto by RAM; Force Low in Editor for testing | Eng+QA |
 | R6 | Enemy/wave still scene-serialized — SO tables unused until M2/M3 | High | Med | WaveTable/EnemyDefinition stubs ready; migrate WaveBossManager early in enemy milestone | Eng |

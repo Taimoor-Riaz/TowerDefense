@@ -4,24 +4,26 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 
 /// <summary>
-/// Foundation helpers: Bootstrap, quality, Android baseline.
+/// Foundation helpers: Bootstrap, quality, Android baseline, config registry.
 /// </summary>
 public static class BootstrapSetupMenu
 {
     private const string BootstrapPath = "Assets/Scenes/Bootstrap.unity";
-    private const string ConfigPath = "Assets/Content/Config/SceneFlowConfig.asset";
+    private const string RegistryPath = "Assets/Content/Config/GameConfigRegistry.asset";
     private const string QualityCatalogPath = "Assets/Content/Quality/MobileQualityCatalog.asset";
 
     [MenuItem("Game/Foundation/Validate Bootstrap Setup")]
     public static void ValidateBootstrapSetup()
     {
-        var config = AssetDatabase.LoadAssetAtPath<SceneFlowConfig>(ConfigPath);
-        if (config == null)
+        var registry = AssetDatabase.LoadAssetAtPath<GameConfigRegistry>(RegistryPath);
+        var resourcesRegistry = Resources.Load<GameConfigRegistry>("GameConfigRegistry");
+        if (registry == null)
         {
-            EditorUtility.DisplayDialog("Bootstrap", "Missing SceneFlowConfig at:\n" + ConfigPath, "OK");
+            EditorUtility.DisplayDialog("Bootstrap", "Missing GameConfigRegistry at:\n" + RegistryPath, "OK");
             return;
         }
 
+        SceneFlowConfig config = registry.SceneFlow;
         bool bootstrapInBuild = false;
         int bootstrapIndex = -1;
         var scenes = EditorBuildSettings.scenes;
@@ -36,9 +38,11 @@ public static class BootstrapSetupMenu
         }
 
         string message =
-            "SceneFlowConfig: OK\n" +
-            "Hub: " + config.hubSceneName + "\n" +
-            "Battle: " + config.battleSceneName + "\n" +
+            "GameConfigRegistry (Content): OK\n" +
+            "Resources registry: " + (resourcesRegistry != null ? "OK" : "MISSING") + "\n" +
+            "Balance: " + (registry.GameBalance != null ? "OK" : "MISSING") + "\n" +
+            "Hub: " + (config != null ? config.hubSceneName : "?") + "\n" +
+            "Battle: " + (config != null ? config.battleSceneName : "?") + "\n" +
             "Bootstrap in Build Settings: " + (bootstrapInBuild ? ("YES (index " + bootstrapIndex + ")") : "NO") + "\n\n" +
             (bootstrapIndex == 0
                 ? "Build order looks correct (Bootstrap first)."
@@ -65,7 +69,7 @@ public static class BootstrapSetupMenu
     public static void ValidateMobileQuality()
     {
         var catalog = AssetDatabase.LoadAssetAtPath<MobileQualityCatalog>(QualityCatalogPath);
-        var resourcesCatalog = Resources.Load<MobileQualityCatalog>("MobileQualityCatalog");
+        var registry = Resources.Load<GameConfigRegistry>("GameConfigRegistry");
         if (catalog == null)
         {
             EditorUtility.DisplayDialog("Mobile Quality", "Missing catalog:\n" + QualityCatalogPath, "OK");
@@ -74,7 +78,7 @@ public static class BootstrapSetupMenu
 
         string msg =
             "Content catalog: OK\n" +
-            "Resources catalog: " + (resourcesCatalog != null ? "OK" : "MISSING") + "\n" +
+            "Registry → MobileQuality: " + (registry != null && registry.MobileQuality != null ? "OK" : "MISSING") + "\n" +
             "Low FPS: " + (catalog.low != null ? catalog.low.targetFrameRate.ToString() : "?") + "\n" +
             "Mid FPS: " + (catalog.mid != null ? catalog.mid.targetFrameRate.ToString() : "?") + "\n" +
             "High FPS: " + (catalog.high != null ? catalog.high.targetFrameRate.ToString() : "?") + "\n" +

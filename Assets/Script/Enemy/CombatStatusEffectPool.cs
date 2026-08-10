@@ -31,6 +31,9 @@ internal static class CombatStatusEffectPool
 
     public static PooledStatusVisual Acquire(CombatStatusVisualKind kind, Transform parent, Vector3 localPosition, float scale)
     {
+        if (!MobileQualityRuntime.EnableStatusIcons)
+            return null;
+
         EnsurePool();
         Stack<PooledStatusVisual> available = kind == CombatStatusVisualKind.Stun ? StunAvailable : PoisonAvailable;
         if (available.Count == 0)

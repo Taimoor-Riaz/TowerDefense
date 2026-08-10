@@ -1,3 +1,4 @@
+using Game.Core.Save;
 using UnityEngine;
 
 /// <summary>
@@ -7,15 +8,21 @@ public class GameServices : MonoBehaviour
 {
     public static GameServices Instance { get; private set; }
 
-    [SerializeField] private SceneFlowConfig sceneFlowConfig;
+    private const string RegistryResourceName = "GameConfigRegistry";
+
+    [SerializeField] private GameConfigRegistry configRegistry;
     [SerializeField] private SceneFlowService sceneFlow;
     [SerializeField] private MobileQualityService mobileQuality;
 
-    private static SceneFlowConfig _pendingConfig;
+    private ISaveService _save;
 
-    public SceneFlowConfig SceneFlowConfig => sceneFlowConfig;
+    public GameConfigRegistry Config => configRegistry;
+    public ISaveService Save => _save ??= new PlayerPrefsSaveService();
     public SceneFlowService SceneFlow => sceneFlow != null ? sceneFlow : SceneFlowService.Instance;
     public MobileQualityService MobileQuality => mobileQuality != null ? mobileQuality : MobileQualityService.Instance;
+
+    /// <summary>Legacy accessor — prefer Config.SceneFlow.</summary>
+    public SceneFlowConfig SceneFlowConfig => configRegistry != null ? configRegistry.SceneFlow : null;
 
     private void Awake()
     {
@@ -28,56 +35,73 @@ public class GameServices : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        if (_pendingConfig != null && sceneFlowConfig == null)
-            sceneFlowConfig = _pendingConfig;
-        _pendingConfig = null;
+        _save ??= new PlayerPrefsSaveService();
+        ResolveRegistry();
+        EnsureChildServices();
+        ApplyRegistryToServices();
+    }
 
+    private void ResolveRegistry()
+    {
+        if (configRegistry != null)
+            return;
+
+        configRegistry = GameConfigRegistry.LoadDefault();
+        if (configRegistry == null)
+            Debug.LogError("[GameServices] Missing GameConfigRegistry. Place Assets/Resources/GameConfigRegistry.asset.");
+    }
+
+    private void EnsureChildServices()
+    {
         if (sceneFlow == null)
             sceneFlow = GetComponent<SceneFlowService>();
-
         if (sceneFlow == null)
             sceneFlow = gameObject.AddComponent<SceneFlowService>();
 
-        if (sceneFlowConfig != null)
-            sceneFlow.SetConfig(sceneFlowConfig);
-
         if (mobileQuality == null)
             mobileQuality = GetComponent<MobileQualityService>();
-
         if (mobileQuality == null)
             mobileQuality = gameObject.AddComponent<MobileQualityService>();
     }
 
-    public void ApplyConfig(SceneFlowConfig flowConfig)
+    private void ApplyRegistryToServices()
     {
-        if (flowConfig == null)
+        if (configRegistry == null)
             return;
 
-        sceneFlowConfig = flowConfig;
-        if (sceneFlow == null)
-            sceneFlow = GetComponent<SceneFlowService>();
-        if (sceneFlow != null)
-            sceneFlow.SetConfig(flowConfig);
+        if (sceneFlow != null && configRegistry.SceneFlow != null)
+            sceneFlow.SetConfig(configRegistry.SceneFlow);
+
+        if (mobileQuality != null && configRegistry.MobileQuality != null)
+            mobileQuality.SetCatalog(configRegistry.MobileQuality);
+    }
+
+    public void ApplyRegistry(GameConfigRegistry registry)
+    {
+        if (registry == null)
+            return;
+
+        configRegistry = registry;
+        ApplyRegistryToServices();
     }
 
     /// <summary>
     /// Ensures services exist when entering play from Hub/Battle without Bootstrap (editor convenience).
     /// Product builds should start from Bootstrap.
     /// </summary>
-    public static GameServices EnsureExists(SceneFlowConfig fallbackConfig = null)
+    public static GameServices EnsureExists(GameConfigRegistry fallbackRegistry = null)
     {
         if (Instance != null)
         {
-            if (fallbackConfig != null)
-                Instance.ApplyConfig(fallbackConfig);
+            if (fallbackRegistry != null)
+                Instance.ApplyRegistry(fallbackRegistry);
             return Instance;
         }
 
-        if (fallbackConfig == null)
-            fallbackConfig = Resources.Load<SceneFlowConfig>("SceneFlowConfig");
-
-        _pendingConfig = fallbackConfig;
         var go = new GameObject("GameServices (Runtime)");
-        return go.AddComponent<GameServices>();
+        var services = go.AddComponent<GameServices>();
+        if (fallbackRegistry != null)
+            services.ApplyRegistry(fallbackRegistry);
+        return services;
     }
 }

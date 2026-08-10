@@ -54,12 +54,32 @@ public sealed class FloatingDamagePool : MonoBehaviour
         if (prefab == null)
             prefab = CreateFallbackPrefab();
 
-        for (int i = 0; i < prewarmCount; i++)
+        int warm = Mathf.Min(prewarmCount, MobileQualityRuntime.MaxConcurrentDamageNumbers);
+        for (int i = 0; i < warm; i++)
+            CreateItem();
+
+        MobileQualityService.OnQualityChanged += HandleQualityChanged;
+    }
+
+    private void OnDestroy()
+    {
+        MobileQualityService.OnQualityChanged -= HandleQualityChanged;
+        if (Instance == this)
+            Instance = null;
+    }
+
+    private void HandleQualityChanged(MobileQualityTier tier, MobileQualityProfile profile)
+    {
+        int target = Mathf.Clamp(MobileQualityRuntime.MaxConcurrentDamageNumbers, 8, 96);
+        while (all.Count < target)
             CreateItem();
     }
 
     public void Show(Vector3 enemyPosition, float damage, EnemyDamageType damageType, EnemyCombatFeedbackTheme theme, bool isBoss)
     {
+        if (!MobileQualityRuntime.EnableDamageNumbers)
+            return;
+
         FloatingDamageText item = TakeItem();
         if (item == null)
             return;
@@ -77,6 +97,9 @@ public sealed class FloatingDamagePool : MonoBehaviour
 
     public void ShowResource(Vector3 worldPosition, int amount, EnemyDamageType numberType)
     {
+        if (!MobileQualityRuntime.EnableDamageNumbers)
+            return;
+
         if (amount <= 0 || (numberType != EnemyDamageType.Healing && numberType != EnemyDamageType.Mana && numberType != EnemyDamageType.ManaGain))
             return;
 
@@ -102,16 +125,29 @@ public sealed class FloatingDamagePool : MonoBehaviour
         if (available.Count > 0)
             return available.Pop();
 
+        int cap = MobileQualityRuntime.MaxConcurrentDamageNumbers;
         FloatingDamageText oldest = null;
         float oldestAge = float.MinValue;
+        int playing = 0;
         for (int i = 0; i < all.Count; i++)
         {
             FloatingDamageText candidate = all[i];
-            if (candidate != null && candidate.IsPlaying && candidate.Age > oldestAge)
+            if (candidate == null || !candidate.IsPlaying)
+                continue;
+
+            playing++;
+            if (candidate.Age > oldestAge)
             {
                 oldest = candidate;
                 oldestAge = candidate.Age;
             }
+        }
+
+        // Under cap with no free item: grow once. At/over cap: recycle oldest.
+        if (playing < cap && all.Count < cap)
+        {
+            CreateItem();
+            return available.Count > 0 ? available.Pop() : null;
         }
 
         if (oldest != null)

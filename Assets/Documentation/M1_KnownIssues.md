@@ -1,6 +1,6 @@
 # Milestone 1 — Known Issues & Scope Honesty
 
-These are **expected** at M1 exit. They are not defects against foundation scope.
+These are **expected** at M1 exit / post-M1 hardening. They are not defects against foundation scope.
 
 ## By design / deferred
 
@@ -10,19 +10,20 @@ These are **expected** at M1 exit. They are not defects against foundation scope
 | Ability SO `implemented = false` | Stubs only | M2 |
 | Enemy behavior components / GDD elites-bosses | Prefabs partial; SO stubs | M3 |
 | WaveTable not driving WaveBossManager yet | Stub asset exists | M2/M3 |
-| Progression (Cards/Runes/leagues) | Missing | M4 |
-| Shop/Gift/Quest/Event real logic | UI shells / fake | Out of M1; later |
+| Progression (Cards/Runes/leagues) + full save JSON | Missing | M4 |
+| Shop/Gift/Quest/Event real logic | UI shells / fake | Later |
 | Prefab folder renames (Zeus→Thunder Oracle, etc.) | NamingMap aliases OK | Polish |
-| `Shapeshifte_Data` filename typo | Tracked in NamingMap | Polish |
-| Gravity Well / Barrier Pulse | Stretch | After 6 launch actives |
+| CurrencyManager Gold/Gems still on PlayerPrefs | Legacy; new code uses ISaveService | M4 |
 
-## Technical notes
+## Technical notes (updated)
 
 | Item | Notes |
 |------|-------|
-| Content vs Resources GameBalanceConfig | Runtime reads **Resources**; keep Content copy synced |
-| Additive Hub+Battle | Hub unloads during battle to avoid dual EventSystem |
-| Prototype ability binding | Disabled; re-enable only for demos via inspector flag |
+| Config source of truth | **GameConfigRegistry** — edit Content assets only; Resources holds registry pointer alone |
+| Summon cost | Battle-only on **ManaManager**; not in CurrencyManager / PlayerPrefs |
+| Additive Hub+Battle | Hub unloads during battle |
+| Prototype ability binding | Disabled (`enablePrototypeTowerBinding = false`) |
+| SceneFlow missing in player build | Logs critical error (editor may fallback) |
 | APK artifact | Build locally — see Android_BuildSmoke.md |
 
 ## Do not claim as “done” in client demos

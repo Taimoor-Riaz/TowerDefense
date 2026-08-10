@@ -279,8 +279,11 @@ public class MainMenuUI : MonoBehaviour
             return;
         }
 
-        // Fallback if Bootstrap/SceneFlow is missing (editor-only convenience).
+#if UNITY_EDITOR
         SceneManager.LoadScene(battleSceneName);
+#else
+        Debug.LogError("[SceneFlow] GameServices/SceneFlow missing — Bootstrap is required in player builds.");
+#endif
     }
 
     public void LogPlaceholder(string featureName)

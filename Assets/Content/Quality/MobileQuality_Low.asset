@@ -16,9 +16,10 @@ MonoBehaviour:
   targetFrameRate: 30
   vsync: 0
   maxConcurrentVfx: 12
+  maxConcurrentDamageNumbers: 16
   enableScreenShake: 0
   enableDamageNumbers: 1
-  enableStatusIcons: 1
+  enableStatusIcons: 0
   particleBudgetScale: 0.5
   reducePostProcessing: 1
   urpNotes: "Low \u2014 prefer fewer particles, no shake, 30 FPS."

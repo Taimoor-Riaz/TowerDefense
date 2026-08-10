@@ -523,6 +523,7 @@ public class Enemy : MonoBehaviour
         }
 
         OnAnyEnemyKilled?.Invoke(this);
+        GameplayEvents.RaiseEnemyKilled(this);
 
         Destroy(gameObject);
     }
@@ -535,6 +536,7 @@ public class Enemy : MonoBehaviour
         isDead = true;
 
         OnAnyEnemyReachedEnd?.Invoke(this);
+        GameplayEvents.RaiseEnemyReachedEnd(this);
 
         UnityEngine.Debug.Log($"{enemyId} reached the end. Leak Damage: {leakDamage}");
 

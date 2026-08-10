@@ -55,15 +55,16 @@ public static class CombatFeedbackBurst
             lifetime = 0.28f;
         }
 
+        count = MobileQualityRuntime.ScaleParticleCount(count);
         Play(position, color, theme, count, speed, size, lifetime);
 
-        if (damageType == EnemyDamageType.Critical || isBoss)
+        if ((damageType == EnemyDamageType.Critical || isBoss) && MobileQualityRuntime.ParticleBudgetScale >= 0.75f)
         {
             Play(
                 position,
                 Color.Lerp(color, Color.white, 0.72f),
                 theme,
-                isBoss ? 9 : 6,
+                MobileQualityRuntime.ScaleParticleCount(isBoss ? 9 : 6),
                 speed * 0.62f,
                 size * 0.58f,
                 lifetime * 0.72f);
@@ -75,7 +76,8 @@ public static class CombatFeedbackBurst
         Color color = isBoss
             ? new Color(0.82f, 0.22f, 1f, 1f)
             : new Color(1f, 0.3f, 0.12f, 1f);
-        Play(position, color, theme, isBoss ? 30 : 18, isBoss ? 3f : 2.1f, isBoss ? 0.24f : 0.16f, isBoss ? 0.7f : 0.5f);
+        int count = MobileQualityRuntime.ScaleParticleCount(isBoss ? 30 : 18);
+        Play(position, color, theme, count, isBoss ? 3f : 2.1f, isBoss ? 0.24f : 0.16f, isBoss ? 0.7f : 0.5f);
     }
 
     private static void Play(Vector3 position, Color color, EnemyCombatFeedbackTheme theme, int count, float speed, float size, float lifetime)

@@ -41,6 +41,9 @@ public sealed class CombatScreenShake : MonoBehaviour
         if (instance == null || !BattleFlowState.IsGameplayActive)
             return;
 
+        if (!MobileQualityRuntime.EnableScreenShake)
+            return;
+
         float requestedStrength = damageType == EnemyDamageType.Critical ? 0.038f : 0.018f;
         float requestedDuration = damageType == EnemyDamageType.Critical ? 0.1f : 0.065f;
 

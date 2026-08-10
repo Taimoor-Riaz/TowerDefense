@@ -29,8 +29,17 @@
 | Ability inventory | `AbilityInventory.md` |
 | Day 3 smoke | `Day3_SmokeChecklist.md` |
 | Mobile checklist | `MobileOptimizationChecklist.md` |
+| Pooling rules (M2 prereq) | `PoolingRules.md` |
+| Addressables foundation | `AddressablesFoundation.md` |
 | Android smoke | `Android_BuildSmoke.md` |
 | Root README | `/README.md` |
+
+## Priority 2 (pre-M2) — done
+
+- MobileQuality consumers + `OnQualityChanged`
+- `PoolService` + pooling rules
+- Local Addressables groups + `AddressableContent`
+- Menu: **Game → Foundation → Validate Game Content**
 
 ## Build artifact
 

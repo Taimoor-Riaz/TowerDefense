@@ -203,6 +203,9 @@ public class WaveBossManager : MonoBehaviour
         {
             OnFirstWaveStarted?.Invoke();
         }
+
+        if (matchRunning)
+            GameplayEvents.RaiseWaveStarted(currentWave);
     }
 
     private IEnumerator WaveRoutine()
@@ -276,6 +279,7 @@ public class WaveBossManager : MonoBehaviour
         if (BattleTopUI.Instance != null)
             BattleTopUI.Instance.RegisterEnemySpawn();
 
+        GameplayEvents.RaiseEnemySpawned(enemy);
         return enemy;
     }
 
@@ -297,6 +301,8 @@ public class WaveBossManager : MonoBehaviour
         UnityEngine.Debug.Log(
             "Boss spawned for Wave " + currentWave +
             " with " + boss.MaxHealth.ToString("0.##") + " HP.");
+        GameplayEvents.RaiseEnemySpawned(boss);
+        GameplayEvents.RaiseBossSpawned(boss);
         return boss;
     }
 

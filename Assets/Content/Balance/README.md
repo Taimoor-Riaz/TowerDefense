@@ -1,8 +1,8 @@
 # Balance
 
-**Runtime source (ManaManager):** `Assets/Resources/GameBalanceConfig.asset`  
-**Designer copy:** `Assets/Content/Balance/GameBalanceConfig.asset`
+**Canonical asset:** `Assets/Content/Balance/GameBalanceConfig.asset`  
+**Access:** `GameServices.Instance.Config.GameBalance` (via `GameConfigRegistry`)
 
-Edit the **Resources** asset to change live match mana / summon cost without code. Keep the Content copy in sync for the Content/ folder convention.
+Do **not** duplicate this under Resources. Change `startingMana`, summon costs, etc. here only.
 
-Fields: `startingMana`, `initialSummonCost`, `summonCostIncreasePerSummon`, `isolateManaFromWalletWater`, board size, loadout slots.
+Summon cost is battle state on `ManaManager` (resets each battle). It is not a wallet currency.

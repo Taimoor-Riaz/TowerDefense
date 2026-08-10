@@ -208,7 +208,11 @@ public class GameOverUI : MonoBehaviour
             return;
         }
 
+#if UNITY_EDITOR
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+#else
+        Debug.LogError("[SceneFlow] GameServices/SceneFlow missing — Bootstrap is required in player builds.");
+#endif
     }
 
     private void ExitToMenu()
@@ -217,10 +221,14 @@ public class GameOverUI : MonoBehaviour
         GameServices.EnsureExists();
         if (SceneFlowService.Instance != null)
         {
-            SceneFlowService.Instance.UnloadBattle();
+            SceneFlowService.Instance.LoadHub();
             return;
         }
 
+#if UNITY_EDITOR
         SceneManager.LoadScene("Main_UI");
+#else
+        Debug.LogError("[SceneFlow] GameServices/SceneFlow missing — Bootstrap is required in player builds.");
+#endif
     }
 }

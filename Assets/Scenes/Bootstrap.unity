@@ -164,7 +164,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 293d3c2913574f168c782b66e5486a3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneFlowConfig: {fileID: 11400000, guid: 3a1b3d9bc34d4713bb5c58ad48be8046, type: 2}
+  configRegistry: {fileID: 11400000, guid: c0ffee01aabb4c2d8e9f001122334455, type: 2}
   sceneFlow: {fileID: 100000004}
   mobileQuality: {fileID: 100000006}
 --- !u!114 &100000004
@@ -192,7 +192,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 613afe9b68ef478bb01f611fde93d185, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  config: {fileID: 11400000, guid: 3a1b3d9bc34d4713bb5c58ad48be8046, type: 2}
+  configRegistry: {fileID: 11400000, guid: c0ffee01aabb4c2d8e9f001122334455, type: 2}
   dontDestroyBootstrapRoot: 1
 --- !u!114 &100000006
 MonoBehaviour:
@@ -206,9 +206,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8976c04cee143a8b804d337a3862bf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  catalog: {fileID: 11400000, guid: 95c9f5b1c68643afa47f95e6987709bc, type: 2}
+  catalog: {fileID: 11400000, guid: 3ea81abc9ea240edad01b326f4a2ac8b, type: 2}
   useAutoDetect: 1
-  allowPlayerPrefsOverride: 1
+  allowSaveOverride: 1
   editorForcedTier: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

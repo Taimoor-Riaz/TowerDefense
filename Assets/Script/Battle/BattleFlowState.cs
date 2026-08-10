@@ -35,11 +35,13 @@ public static class BattleFlowState
     public static void BeginBattle()
     {
         SetPhase(BattlePhase.Active);
+        GameplayEvents.RaiseBattleStarted();
     }
 
     public static void EndBattle()
     {
         SetPhase(BattlePhase.Ended);
+        GameplayEvents.RaiseBattleEnded();
     }
 
     private static void SetPhase(BattlePhase phase)

@@ -1,19 +1,20 @@
+using Game.Core.Save;
+using System;
 using UnityEngine;
 
 /// <summary>
-/// Applies mobile quality profiles (FPS, VFX budget flags). Lives on Bootstrap / GameServices.
-/// Other systems can read <see cref="ActiveProfile"/> without hardcoding device checks.
+/// Applies mobile quality profiles. Raises <see cref="OnQualityChanged"/> once so systems reconfigure without per-frame polling.
 /// </summary>
 public class MobileQualityService : MonoBehaviour
 {
     public static MobileQualityService Instance { get; private set; }
 
-    private const string CatalogResourceName = "MobileQualityCatalog";
-    private const string PrefsTierKey = "MOBILE_QUALITY_TIER";
+    /// <summary>Fired after FPS/runtime snapshot is applied. Subscribe and update caches once.</summary>
+    public static event Action<MobileQualityTier, MobileQualityProfile> OnQualityChanged;
 
     [SerializeField] private MobileQualityCatalog catalog;
     [SerializeField] private bool useAutoDetect = true;
-    [SerializeField] private bool allowPlayerPrefsOverride = true;
+    [SerializeField] private bool allowSaveOverride = true;
     [SerializeField] private MobileQualityTier editorForcedTier = MobileQualityTier.Mid;
 
     public MobileQualityCatalog Catalog => catalog;
@@ -33,18 +34,32 @@ public class MobileQualityService : MonoBehaviour
         ApplySelectedTier();
     }
 
+    public void SetCatalog(MobileQualityCatalog qualityCatalog)
+    {
+        if (qualityCatalog == null)
+            return;
+
+        catalog = qualityCatalog;
+        ApplySelectedTier();
+    }
+
     private void ResolveCatalog()
     {
         if (catalog != null)
             return;
 
-        catalog = Resources.Load<MobileQualityCatalog>(CatalogResourceName);
+        if (GameServices.Instance != null && GameServices.Instance.Config != null)
+            catalog = GameServices.Instance.Config.MobileQuality;
+    }
+
+    private ISaveService GetSave()
+    {
+        return GameServices.Instance != null ? GameServices.Instance.Save : null;
     }
 
     public void ApplySelectedTier()
     {
-        MobileQualityTier tier = ResolveTier();
-        ApplyTier(tier);
+        ApplyTier(ResolveTier());
     }
 
     public void ApplyTier(MobileQualityTier tier)
@@ -57,27 +72,37 @@ public class MobileQualityService : MonoBehaviour
         {
             Application.targetFrameRate = 60;
             QualitySettings.vSyncCount = 0;
+            MobileQualityRuntime.Apply(null, tier);
+            OnQualityChanged?.Invoke(tier, null);
             Debug.LogWarning("[MobileQuality] No profile found — defaulted to 60 FPS.");
             return;
         }
 
         Application.targetFrameRate = Mathf.Clamp(ActiveProfile.targetFrameRate, 15, 120);
         QualitySettings.vSyncCount = ActiveProfile.vsync ? 1 : 0;
+        MobileQualityRuntime.Apply(ActiveProfile, tier);
+        OnQualityChanged?.Invoke(tier, ActiveProfile);
 
         Debug.Log(
             "[MobileQuality] Applied " + tier +
             " | FPS=" + Application.targetFrameRate +
-            " | VFX cap=" + ActiveProfile.maxConcurrentVfx +
-            " | particles=" + ActiveProfile.particleBudgetScale +
-            " | RAM=" + SystemInfo.systemMemorySize + "MB");
+            " | shake=" + MobileQualityRuntime.EnableScreenShake +
+            " | numbers=" + MobileQualityRuntime.EnableDamageNumbers +
+            " | status=" + MobileQualityRuntime.EnableStatusIcons +
+            " | VFX cap=" + MobileQualityRuntime.MaxConcurrentVfx +
+            " | particles=" + MobileQualityRuntime.ParticleBudgetScale);
     }
 
     public void SetTierManual(MobileQualityTier tier, bool persist = true)
     {
-        if (persist && allowPlayerPrefsOverride)
+        if (persist && allowSaveOverride)
         {
-            PlayerPrefs.SetInt(PrefsTierKey, (int)tier);
-            PlayerPrefs.Save();
+            ISaveService save = GetSave();
+            if (save != null)
+            {
+                save.SaveInt(SaveKeys.MobileQualityTier, (int)tier);
+                save.Save();
+            }
         }
 
         ApplyTier(tier);
@@ -89,8 +114,9 @@ public class MobileQualityService : MonoBehaviour
         if (!Application.isPlaying)
             return editorForcedTier;
 #endif
-        if (allowPlayerPrefsOverride && PlayerPrefs.HasKey(PrefsTierKey))
-            return (MobileQualityTier)PlayerPrefs.GetInt(PrefsTierKey, (int)MobileQualityTier.Mid);
+        ISaveService save = GetSave();
+        if (allowSaveOverride && save != null && save.HasKey(SaveKeys.MobileQualityTier))
+            return (MobileQualityTier)save.LoadInt(SaveKeys.MobileQualityTier, (int)MobileQualityTier.Mid);
 
         if (useAutoDetect && catalog != null)
             return catalog.DetectTierFromDevice();
@@ -101,9 +127,6 @@ public class MobileQualityService : MonoBehaviour
         return editorForcedTier;
     }
 
-    /// <summary>
-    /// Ensures a quality service exists (editor play from non-Bootstrap scenes).
-    /// </summary>
     public static MobileQualityService EnsureExists()
     {
         if (Instance != null)

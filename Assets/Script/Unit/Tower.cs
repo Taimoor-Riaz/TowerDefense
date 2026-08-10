@@ -274,6 +274,7 @@ public class Tower : MonoBehaviour
     private void HandleProjectileHit(Enemy target, float dealtDamage)
     {
         AttackHit?.Invoke(this, target, dealtDamage);
+        GameplayEvents.RaiseDamageDealt(this, target, dealtDamage);
     }
 
     public AttackProfile CaptureAttackProfile()

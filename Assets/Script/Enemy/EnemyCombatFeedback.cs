@@ -117,6 +117,9 @@ public sealed class EnemyCombatFeedback : MonoBehaviour
         if (!initialized || duration <= 0f)
             return;
 
+        if (!MobileQualityRuntime.EnableStatusIcons)
+            return;
+
         if (statusType == EnemyStatusType.Stun)
         {
             stunStatus.Show(duration, statusIcon);

@@ -49,25 +49,12 @@ public class SceneFlowService : MonoBehaviour
     public void LoadBattle()
     {
         // Unload hub while in battle to avoid dual EventSystem/AudioListener on mobile.
-        StartTransition(LoadBattleRoutine(unloadHub: true));
-    }
-
-    public void UnloadBattle()
-    {
-        StartTransition(UnloadBattleRoutine());
+        StartTransition(LoadBattleRoutine());
     }
 
     public void ReloadBattle()
     {
         StartTransition(ReloadBattleRoutine());
-    }
-
-    /// <summary>
-    /// Temporary bridge for old single-scene callers. Prefer LoadBattle/UnloadBattle.
-    /// </summary>
-    public void LoadBattleReplacingOthers()
-    {
-        StartTransition(LoadBattleRoutine(unloadHub: false));
     }
 
     private void StartTransition(IEnumerator routine)
@@ -103,13 +90,13 @@ public class SceneFlowService : MonoBehaviour
         TransitionCompleted?.Invoke(hub);
     }
 
-    private IEnumerator LoadBattleRoutine(bool unloadHub = false)
+    private IEnumerator LoadBattleRoutine()
     {
         _isTransitioning = true;
         string battle = GetBattleName();
         TransitionStarted?.Invoke(battle);
 
-        if (unloadHub && IsHubLoaded)
+        if (IsHubLoaded)
             yield return UnloadSceneAsync(GetHubName());
 
         if (IsBattleLoaded)
@@ -121,26 +108,6 @@ public class SceneFlowService : MonoBehaviour
 
         _isTransitioning = false;
         TransitionCompleted?.Invoke(battle);
-    }
-
-    private IEnumerator UnloadBattleRoutine()
-    {
-        _isTransitioning = true;
-        string hub = GetHubName();
-        TransitionStarted?.Invoke(hub);
-
-        if (IsBattleLoaded)
-            yield return UnloadSceneAsync(GetBattleName());
-
-        if (!IsHubLoaded)
-            yield return LoadSceneAdditiveAsync(hub);
-
-        SetActiveScene(hub);
-        Time.timeScale = 1f;
-        yield return WaitMinTransition();
-
-        _isTransitioning = false;
-        TransitionCompleted?.Invoke(hub);
     }
 
     private IEnumerator ReloadBattleRoutine()

@@ -22,6 +22,8 @@ public class MobileQualityProfile : ScriptableObject
     [Header("VFX / pools (consumers read these flags)")]
     [Tooltip("Max concurrent ability/combat VFX instances recommended.")]
     [Min(1)] public int maxConcurrentVfx = 24;
+    [Tooltip("Max concurrent floating damage / resource numbers.")]
+    [Min(1)] public int maxConcurrentDamageNumbers = 48;
     public bool enableScreenShake = true;
     public bool enableDamageNumbers = true;
     public bool enableStatusIcons = true;

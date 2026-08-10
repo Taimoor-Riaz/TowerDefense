@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class BootstrapLoader : MonoBehaviour
 {
-    [SerializeField] private SceneFlowConfig config;
+    [SerializeField] private GameConfigRegistry configRegistry;
     [SerializeField] private bool dontDestroyBootstrapRoot = true;
 
     private void Awake()
@@ -18,20 +18,17 @@ public class BootstrapLoader : MonoBehaviour
         if (services == null)
             services = gameObject.AddComponent<GameServices>();
 
-        if (config != null)
-        {
-            var flow = GetComponent<SceneFlowService>();
-            if (flow == null)
-                flow = gameObject.AddComponent<SceneFlowService>();
-            flow.SetConfig(config);
-        }
+        if (configRegistry != null)
+            services.ApplyRegistry(configRegistry);
     }
 
     private void Start()
     {
-        SceneFlowConfig flowConfig = config;
-        if (flowConfig == null && GameServices.Instance != null)
-            flowConfig = GameServices.Instance.SceneFlowConfig;
+        SceneFlowConfig flowConfig = null;
+        if (GameServices.Instance != null && GameServices.Instance.Config != null)
+            flowConfig = GameServices.Instance.Config.SceneFlow;
+        if (flowConfig == null && configRegistry != null)
+            flowConfig = configRegistry.SceneFlow;
 
         bool shouldLoadHub = flowConfig == null || flowConfig.loadHubOnBootstrapStart;
         if (!shouldLoadHub)

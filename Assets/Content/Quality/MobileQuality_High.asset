@@ -16,6 +16,7 @@ MonoBehaviour:
   targetFrameRate: 60
   vsync: 0
   maxConcurrentVfx: 40
+  maxConcurrentDamageNumbers: 64
   enableScreenShake: 1
   enableDamageNumbers: 1
   enableStatusIcons: 1

@@ -5,6 +5,7 @@ public sealed class AbilityVfxPool : MonoBehaviour
 {
     private readonly Dictionary<int, Queue<PooledAbilityVfx>> available = new Dictionary<int, Queue<PooledAbilityVfx>>();
     private Transform inactiveRoot;
+    private int activeCount;
 
     public static AbilityVfxPool Instance { get; private set; }
 
@@ -45,6 +46,9 @@ public sealed class AbilityVfxPool : MonoBehaviour
         if (prefab == null)
             return null;
 
+        if (activeCount >= MobileQualityRuntime.MaxConcurrentVfx)
+            return null;
+
         int key = prefab.GetInstanceID();
         if (!available.TryGetValue(key, out Queue<PooledAbilityVfx> queue))
         {
@@ -61,6 +65,7 @@ public sealed class AbilityVfxPool : MonoBehaviour
             item = Instantiate(prefab, inactiveRoot);
             item.name = prefab.name;
             item.AssignPool(this, key);
+            ApplyParticleBudget(item.gameObject);
         }
 
         Transform itemTransform = item.transform;
@@ -68,6 +73,7 @@ public sealed class AbilityVfxPool : MonoBehaviour
         itemTransform.SetPositionAndRotation(position, rotation);
         item.gameObject.SetActive(true);
         item.OnTakenFromPool();
+        activeCount++;
         return item as T;
     }
 
@@ -79,6 +85,7 @@ public sealed class AbilityVfxPool : MonoBehaviour
         item.OnReturnedToPool();
         item.gameObject.SetActive(false);
         item.transform.SetParent(inactiveRoot, false);
+        activeCount = Mathf.Max(0, activeCount - 1);
 
         if (!available.TryGetValue(key, out Queue<PooledAbilityVfx> queue))
         {
@@ -87,6 +94,20 @@ public sealed class AbilityVfxPool : MonoBehaviour
         }
 
         queue.Enqueue(item);
+    }
+
+    private static void ApplyParticleBudget(GameObject root)
+    {
+        float scale = MobileQualityRuntime.ParticleBudgetScale;
+        if (root == null || Mathf.Approximately(scale, 1f))
+            return;
+
+        ParticleSystem[] systems = root.GetComponentsInChildren<ParticleSystem>(true);
+        for (int i = 0; i < systems.Length; i++)
+        {
+            ParticleSystem.MainModule main = systems[i].main;
+            main.maxParticles = Mathf.Max(1, Mathf.RoundToInt(main.maxParticles * scale));
+        }
     }
 }
 

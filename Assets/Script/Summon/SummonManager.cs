@@ -196,6 +196,7 @@ public class SummonManager : MonoBehaviour
             GameStatsTracker.Instance.AddUnitSummoned();
 
         GameAudioManager.PlaySummon();
+        GameplayEvents.RaiseUnitSummoned(randomUnit, 1);
 
         if (ManaManager.Instance != null)
         {

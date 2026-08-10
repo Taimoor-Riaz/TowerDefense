@@ -140,6 +140,7 @@ public class MergeManager : MonoBehaviour
 
         PlayMergeEffect(targetCell.SpawnPosition);
         GameAudioManager.PlayMerge();
+        GameplayEvents.RaiseUnitMerged(resultUnit, nextLevel);
 
         UnityEngine.Debug.Log("Merge success: " + resultUnit.unitName + " Lv" + nextLevel);
         return true;
