@@ -126,7 +126,11 @@ public sealed class NatureBlessingBuffAbility : TowerAbilityBase
         for (int i = 0; i < towers.Count; i++)
         {
             Tower ally = towers[i];
-            if (ally == null || ally == AttackTower || !ally.CanDealNormalAttackDamage)
+            // Destroyed Unity objects compare as null; prune stale ActiveTowers entries.
+            if (ally == null)
+                continue;
+
+            if (ally == AttackTower || !ally.CanDealNormalAttackDamage)
                 continue;
 
             BoardTower allyBoardTower = ally.GetComponent<BoardTower>();
@@ -164,8 +168,11 @@ public sealed class NatureBlessingBuffAbility : TowerAbilityBase
         for (int i = 0; i < count; i++)
             nextAffectedTowers.Add(candidates[i].tower);
 
-        foreach (Tower previous in affectedTowers)
+        // Copy first — HashSet mutation / destroyed refs during RemoveDamageBuff.
+        List<Tower> previousSnapshot = new List<Tower>(affectedTowers);
+        for (int i = 0; i < previousSnapshot.Count; i++)
         {
+            Tower previous = previousSnapshot[i];
             if (previous != null && !nextAffectedTowers.Contains(previous))
                 previous.RemoveDamageBuff(sourceId);
         }
@@ -173,6 +180,9 @@ public sealed class NatureBlessingBuffAbility : TowerAbilityBase
         for (int i = 0; i < count; i++)
         {
             Tower ally = candidates[i].tower;
+            if (ally == null)
+                continue;
+
             orderedAffectedTowers.Add(ally);
 
             if (refreshActiveBuffs || !affectedTowers.Contains(ally))
@@ -238,8 +248,10 @@ public sealed class NatureBlessingBuffAbility : TowerAbilityBase
     private void RemoveAllBuffs()
     {
         int sourceId = GetInstanceID();
-        foreach (Tower ally in affectedTowers)
+        List<Tower> snapshot = new List<Tower>(affectedTowers);
+        for (int i = 0; i < snapshot.Count; i++)
         {
+            Tower ally = snapshot[i];
             if (ally != null)
                 ally.RemoveDamageBuff(sourceId);
         }

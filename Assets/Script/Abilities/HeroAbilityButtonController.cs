@@ -43,6 +43,7 @@ public sealed class HeroAbilityButtonController : MonoBehaviour
         TowerBoardCell.BoardChanged += RefreshBindings;
         BoardTowerInputController.AbilitySelectionChanged += HandleSelectionChanged;
         SceneManager.sceneLoaded += HandleSceneLoaded;
+        SceneManager.sceneUnloaded += HandleSceneUnloaded;
     }
 
     private void Start()
@@ -55,6 +56,9 @@ public sealed class HeroAbilityButtonController : MonoBehaviour
 
     private void Update()
     {
+        if (!HasValidUiSlots())
+            return;
+
         if (!enablePrototypeTowerBinding)
         {
             for (int i = 0; i < buttons.Count; i++)
@@ -78,6 +82,7 @@ public sealed class HeroAbilityButtonController : MonoBehaviour
         TowerBoardCell.BoardChanged -= RefreshBindings;
         BoardTowerInputController.AbilitySelectionChanged -= HandleSelectionChanged;
         SceneManager.sceneLoaded -= HandleSceneLoaded;
+        SceneManager.sceneUnloaded -= HandleSceneUnloaded;
         RemoveButtonListeners();
     }
 
@@ -92,7 +97,13 @@ public sealed class HeroAbilityButtonController : MonoBehaviour
         RefreshBindings();
     }
 
-    private void ResolveExistingButtons()
+    private void HandleSceneUnloaded(Scene scene)
+    {
+        // Battle/Hub UI Images are destroyed with their scene — drop stale refs immediately.
+        ClearResolvedButtons();
+    }
+
+    private void ClearResolvedButtons()
     {
         RemoveButtonListeners();
         buttons.Clear();
@@ -103,6 +114,29 @@ public sealed class HeroAbilityButtonController : MonoBehaviour
         originalSprites.Clear();
         bindings.Clear();
         listeners.Clear();
+    }
+
+    private bool HasValidUiSlots()
+    {
+        if (buttons.Count == 0 || images.Count == 0)
+            return false;
+
+        // Unity fake-null: destroyed UI after additive unload.
+        for (int i = 0; i < images.Count; i++)
+        {
+            if (images[i] == null || buttons[i] == null)
+            {
+                ClearResolvedButtons();
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void ResolveExistingButtons()
+    {
+        ClearResolvedButtons();
 
         Image[] sceneImages = FindObjectsByType<Image>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         for (int nameIndex = 0; nameIndex < existingButtonObjectNames.Length; nameIndex++)
@@ -174,8 +208,19 @@ public sealed class HeroAbilityButtonController : MonoBehaviour
 
     private void UpdateSlotVisual(int index, bool force = false)
     {
-        if (index < 0 || index >= buttons.Count)
+        if (index < 0 || index >= buttons.Count || index >= images.Count)
             return;
+
+        Image baseImage = images[index];
+        Image charge = index < chargeFills.Count ? chargeFills[index] : null;
+        Image glow = index < readyGlows.Count ? readyGlows[index] : null;
+        TextMeshProUGUI label = index < cooldownLabels.Count ? cooldownLabels[index] : null;
+        Button button = buttons[index];
+        if (baseImage == null || charge == null || glow == null || label == null || button == null)
+        {
+            ClearResolvedButtons();
+            return;
+        }
 
         TowerAbilityBase ability = index < bindings.Count ? bindings[index] : null;
         bool bound = ability != null && ability.Owner != null && ability.Owner.CurrentCell != null;
@@ -186,11 +231,9 @@ public sealed class HeroAbilityButtonController : MonoBehaviour
             ? originalSprites[index]
             : bound ? ability.AbilityIcon : null;
 
-        Image baseImage = images[index];
         baseImage.sprite = displaySprite;
         baseImage.color = !bound ? unavailableColor : ready ? Color.white : coolingColor;
 
-        Image charge = chargeFills[index];
         charge.sprite = displaySprite;
         charge.type = Image.Type.Filled;
         charge.fillMethod = Image.FillMethod.Radial360;
@@ -200,7 +243,6 @@ public sealed class HeroAbilityButtonController : MonoBehaviour
         charge.color = WithAlpha(Color.Lerp(Color.white, abilityColor, 0.52f), bound ? chargeFillAlpha : 0f);
         charge.enabled = bound && displaySprite != null;
 
-        Image glow = readyGlows[index];
         glow.sprite = displaySprite;
         glow.enabled = ready && displaySprite != null;
         if (glow.enabled)
@@ -210,13 +252,12 @@ public sealed class HeroAbilityButtonController : MonoBehaviour
             glow.rectTransform.localScale = Vector3.one * Mathf.Lerp(1.02f, readyGlowScale, pulse);
         }
 
-        TextMeshProUGUI label = cooldownLabels[index];
         label.gameObject.SetActive(bound && !ready);
         if (bound && !ready)
             label.SetText("{0:0}", Mathf.Ceil(ability.CooldownRemaining));
 
-        buttons[index].interactable = ready;
-        buttons[index].gameObject.name = existingButtonObjectNames[index];
+        button.interactable = ready;
+        button.gameObject.name = existingButtonObjectNames[Mathf.Min(index, existingButtonObjectNames.Length - 1)];
     }
 
     private void HandlePressed(int index)

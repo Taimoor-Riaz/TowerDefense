@@ -164,10 +164,20 @@ public class Tower : MonoBehaviour
     private void OnDisable()
     {
         activeTowers.Remove(this);
+        PruneDestroyedActiveTowers();
         damageBuffs.Clear();
         damageMultiplier = 1f;
         UpdateDamageBuffReadout();
         damageBuffVisual?.Hide();
+    }
+
+    private static void PruneDestroyedActiveTowers()
+    {
+        for (int i = activeTowers.Count - 1; i >= 0; i--)
+        {
+            if (activeTowers[i] == null)
+                activeTowers.RemoveAt(i);
+        }
     }
 
     private void Update()
@@ -264,11 +274,19 @@ public class Tower : MonoBehaviour
         bool isCritical = UnityEngine.Random.value < effectiveCriticalChance;
         float shotDamage = isCritical ? CurrentDamage * effectiveCriticalMultiplier : CurrentDamage;
         runtimeLastProjectileDamage = shotDamage;
+
+        // Capture self so a mid-flight hit after merge/destroy does not touch a destroyed Tower.
+        Tower self = this;
         bullet.SetTarget(
             target,
             shotDamage,
             ResolveDamageType(),
-            (hitTarget, dealt) => HandleProjectileHit(hitTarget, dealt, isCritical),
+            (hitTarget, dealt) =>
+            {
+                if (self == null)
+                    return;
+                self.HandleProjectileHit(hitTarget, dealt, isCritical);
+            },
             isCritical,
             ElementColor);
         GameAudioManager.PlayUnitAttack(
