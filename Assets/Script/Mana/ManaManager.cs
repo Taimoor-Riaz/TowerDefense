@@ -146,4 +146,17 @@ public class ManaManager : MonoBehaviour
         CurrentSummonCost += summonCostIncrease;
         OnSummonCostChanged?.Invoke(CurrentSummonCost);
     }
+
+    /// <summary>
+    /// Resets match mana and summon cost from GameBalanceConfig.
+    /// Called when a battle becomes Active so Retry / new match never inherit the previous ramp.
+    /// </summary>
+    public void ResetMatchEconomy()
+    {
+        ResolveBalanceConfig();
+        ApplyBalanceConfig();
+        SetManaInternal(startingMana, true);
+        CurrentSummonCost = initialSummonCost;
+        OnSummonCostChanged?.Invoke(CurrentSummonCost);
+    }
 }

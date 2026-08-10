@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Tunable match economy / rules. Edit in Inspector — do not hardcode in managers.
-/// Wire ManaManager to this on Day 3.
+/// Accessed via GameConfigRegistry → GameBalanceConfig → ManaManager.
 /// </summary>
 [CreateAssetMenu(fileName = "GameBalanceConfig", menuName = "Game/Balance/Game Balance Config")]
 public class GameBalanceConfig : ScriptableObject

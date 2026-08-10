@@ -19,12 +19,15 @@ These are **expected** at M1 exit / post-M1 hardening. They are not defects agai
 
 | Item | Notes |
 |------|-------|
-| Config source of truth | **GameConfigRegistry** — edit Content assets only; Resources holds registry pointer alone |
+| Config source of truth | **Only** `Assets/Content/Resources/GameConfigRegistry.asset` → Content configs |
+| Economy flow | GameConfigRegistry → GameBalanceConfig → ManaManager (`ResetMatchEconomy` on BeginBattle) |
 | Summon cost | Battle-only on **ManaManager**; not in CurrencyManager / PlayerPrefs |
+| Enemy pooling | Deferred to **M3** with WaveTable/EnemyDefinition migration |
 | Additive Hub+Battle | Hub unloads during battle |
 | Prototype ability binding | Disabled (`enablePrototypeTowerBinding = false`) |
 | SceneFlow missing in player build | Logs critical error (editor may fallback) |
-| APK artifact | Build locally — see Android_BuildSmoke.md |
+| Addressables | Helper + menu ready; commit `AddressableAssetsData` after first Initialize |
+| APK artifact | Build locally — see Android_BuildSmoke.md (physical device) |
 
 ## Do not claim as “done” in client demos
 

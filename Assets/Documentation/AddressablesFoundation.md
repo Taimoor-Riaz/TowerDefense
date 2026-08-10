@@ -1,12 +1,16 @@
 # Addressables Foundation (local)
 
-Package: `com.unity.addressables` (added to `Packages/manifest.json`).
+Package: `com.unity.addressables` (in `Packages/manifest.json`).
 
-## Setup (once in Unity)
+## Setup (required once)
 
-1. Open project so Package Manager resolves Addressables.  
+1. Open the project in Unity (Package Manager resolves Addressables).  
 2. Menu: **Game → Foundation → Initialize Addressables Groups**  
-3. Groups created (local build/load paths): Core, Units, Abilities, Enemies, Bosses, VFX, Audio, UI  
+   - Batch: `Unity -batchmode -quit -executeMethod AddressablesFoundationMenu.InitializeAddressablesGroupsBatch`  
+3. Commit generated `Assets/AddressableAssetsData/` (settings + groups).  
+4. Groups (local build/load paths): Core, Units, Abilities, Enemies, Bosses, VFX, Audio, UI  
+
+If `AddressableAssetsData` is missing, M2/M3 heavy content must not be marked Addressable yet — run the menu first.
 
 ## Runtime API
 
@@ -16,7 +20,6 @@ await handle.Task;
 // use handle.Result
 AddressableContent.Release(handle);
 
-// Or instantiate:
 GameObject go = await AddressableContent.InstantiateAsync("Enemies/Runner", pos, rot);
 AddressableContent.ReleaseInstance(go);
 ```
@@ -31,4 +34,4 @@ Do **not** convert the whole project now. Prefer Addressables for heavy M2/M3 co
 - Enemy / boss prefabs  
 - Large UI art  
 
-Config ScriptableObjects stay in `Assets/Content` + `GameConfigRegistry`.
+Config ScriptableObjects stay on `GameConfigRegistry` (`Assets/Content/Resources/GameConfigRegistry.asset`).

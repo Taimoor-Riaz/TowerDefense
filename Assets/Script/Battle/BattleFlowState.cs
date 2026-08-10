@@ -34,12 +34,20 @@ public static class BattleFlowState
 
     public static void BeginBattle()
     {
+        if (Phase == BattlePhase.Active)
+            return;
+
         SetPhase(BattlePhase.Active);
+        if (ManaManager.Instance != null)
+            ManaManager.Instance.ResetMatchEconomy();
         GameplayEvents.RaiseBattleStarted();
     }
 
     public static void EndBattle()
     {
+        if (Phase == BattlePhase.Ended)
+            return;
+
         SetPhase(BattlePhase.Ended);
         GameplayEvents.RaiseBattleEnded();
     }

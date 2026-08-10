@@ -4,7 +4,7 @@ Maps **client milestones** to audit phases and GDD §19.
 
 | Client milestone | Audit / Phase | Focus |
 |------------------|---------------|--------|
-| **M1 Foundation & Technical Setup** (this sprint, 5 days) | M0 / Phase 1 / Repair §4.1 | Config-first architecture, additive scenes, mobile quality baseline, Option A lock, naming map, Android smoke |
+| **M1 Foundation & Technical Setup** (10 working days) | M0 / Phase 1 / Repair §4.1 | Config-first architecture, additive scenes, mobile quality baseline, Option A lock, naming map, Android smoke |
 | **M2 Core Gameplay Systems** | Audit M1 Ability + harden core | Pre-match 6 units + 2 actives, ActiveAbility SO catalog, global cast, HUD unbound from tower |
 | **M3 Combat, Enemy & Boss** | Audit M2 (+ unit identity pass) | EnemyDefinition, 6+3+3 mechanics, wave tables |
 | **M4 Progression, Meta & UI** | Audit M4–M5 | Gold/Gems/Cards/Runes, save, leagues/opponent v1, UI wiring |

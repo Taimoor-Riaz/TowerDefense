@@ -2,7 +2,8 @@ using UnityEngine;
 
 /// <summary>
 /// Single source of truth for game configuration assets.
-/// Bootstrap / GameServices holds one registry; do not duplicate configs under Resources.
+/// Canonical path: Assets/Content/Resources/GameConfigRegistry.asset
+/// (Resources.Load works; do not duplicate configs under Assets/Resources).
 /// </summary>
 [CreateAssetMenu(fileName = "GameConfigRegistry", menuName = "Game/Core/Game Config Registry")]
 public class GameConfigRegistry : ScriptableObject

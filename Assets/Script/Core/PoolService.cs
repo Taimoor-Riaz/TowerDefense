@@ -86,7 +86,17 @@ public sealed class PoolService : MonoBehaviour
 
         GameObject item = null;
         while (queue.Count > 0 && item == null)
-            item = queue.Dequeue();
+        {
+            GameObject candidate = queue.Dequeue();
+            if (candidate == null)
+                continue;
+
+            var pooled = candidate.GetComponent<PooledInstance>();
+            if (pooled != null && !pooled.IsInPool)
+                continue;
+
+            item = candidate;
+        }
 
         if (item == null)
         {
@@ -96,8 +106,13 @@ public sealed class PoolService : MonoBehaviour
             if (tracker == null)
                 tracker = item.AddComponent<PooledInstance>();
             tracker.PoolKey = key;
+            tracker.IsInPool = true;
             ApplyParticleBudget(item);
         }
+
+        var state = item.GetComponent<PooledInstance>();
+        if (state != null)
+            state.IsInPool = false;
 
         item.transform.SetParent(null, false);
         item.transform.SetPositionAndRotation(position, rotation);
@@ -114,7 +129,15 @@ public sealed class PoolService : MonoBehaviour
             return;
 
         var tracker = item.GetComponent<PooledInstance>();
-        int key = tracker != null ? tracker.PoolKey : item.GetInstanceID();
+        if (tracker == null)
+            tracker = item.AddComponent<PooledInstance>();
+
+        if (tracker.IsInPool)
+            return;
+
+        int key = tracker.PoolKey != 0 ? tracker.PoolKey : item.GetInstanceID();
+        tracker.PoolKey = key;
+        tracker.IsInPool = true;
 
         item.SetActive(false);
         item.transform.SetParent(inactiveRoot, false);
@@ -146,8 +169,9 @@ public sealed class PoolService : MonoBehaviour
     }
 }
 
-/// <summary>Marks a pooled GameObject and stores its pool key.</summary>
+/// <summary>Marks a pooled GameObject and stores its pool key + in-pool state for double-release safety.</summary>
 public sealed class PooledInstance : MonoBehaviour
 {
     public int PoolKey;
+    public bool IsInPool;
 }

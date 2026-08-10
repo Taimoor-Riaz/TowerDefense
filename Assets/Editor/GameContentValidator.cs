@@ -10,6 +10,8 @@ using UnityEngine;
 /// </summary>
 public static class GameContentValidator
 {
+    private const string RegistryPath = "Assets/Content/Resources/GameConfigRegistry.asset";
+
     [MenuItem("Game/Foundation/Validate Game Content")]
     public static void ValidateGameContent()
     {
@@ -45,7 +47,7 @@ public static class GameContentValidator
         if (!scenes[0].enabled || scenes[0].path != "Assets/Scenes/Bootstrap.unity")
         {
             errors++;
-            sb.AppendLine("ERROR: Bootstrap.unity must be Build Settings index 0.");
+            sb.AppendLine("ERROR: Bootstrap.unity must be Build Settings index 0. Fix: File → Build Profiles / Build Settings.");
         }
         else
             sb.AppendLine("OK: Bootstrap index 0");
@@ -81,55 +83,116 @@ public static class GameContentValidator
 
     private static void ValidateRegistry(StringBuilder sb, ref int errors, ref int warnings)
     {
-        sb.AppendLine("== Config ==");
-        var registry = AssetDatabase.LoadAssetAtPath<GameConfigRegistry>("Assets/Content/Config/GameConfigRegistry.asset");
-        var resourcesRegistry = Resources.Load<GameConfigRegistry>("GameConfigRegistry");
-        if (registry == null)
+        sb.AppendLine("== Config / GameConfigRegistry ==");
+
+        string[] registryGuids = AssetDatabase.FindAssets("t:GameConfigRegistry");
+        if (registryGuids.Length == 0)
         {
             errors++;
-            sb.AppendLine("ERROR: Missing Content GameConfigRegistry.");
+            sb.AppendLine("ERROR: No GameConfigRegistry asset found. Expected: " + RegistryPath);
             return;
         }
 
-        sb.AppendLine("OK: Content GameConfigRegistry");
-        if (resourcesRegistry == null)
+        if (registryGuids.Length > 1)
         {
             errors++;
-            sb.AppendLine("ERROR: Missing Resources/GameConfigRegistry.asset");
+            sb.AppendLine("ERROR: Multiple GameConfigRegistry assets (" + registryGuids.Length + "). Keep only " + RegistryPath);
+            for (int i = 0; i < registryGuids.Length; i++)
+                sb.AppendLine("  - " + AssetDatabase.GUIDToAssetPath(registryGuids[i]));
         }
         else
-            sb.AppendLine("OK: Resources GameConfigRegistry");
+            sb.AppendLine("OK: Exactly one GameConfigRegistry");
+
+        var registry = AssetDatabase.LoadAssetAtPath<GameConfigRegistry>(RegistryPath);
+        if (registry == null)
+        {
+            errors++;
+            sb.AppendLine("ERROR: Canonical registry missing at " + RegistryPath);
+            string fallback = AssetDatabase.GUIDToAssetPath(registryGuids[0]);
+            registry = AssetDatabase.LoadAssetAtPath<GameConfigRegistry>(fallback);
+            if (registry == null)
+                return;
+            sb.AppendLine("WARN: Validating fallback at " + fallback);
+            warnings++;
+        }
+        else
+            sb.AppendLine("OK: " + RegistryPath);
+
+        var loaded = Resources.Load<GameConfigRegistry>("GameConfigRegistry");
+        if (loaded == null)
+        {
+            errors++;
+            sb.AppendLine("ERROR: Resources.Load(\"GameConfigRegistry\") failed. Registry must live under a Resources folder.");
+        }
+        else if (registry != null && loaded != registry)
+        {
+            errors++;
+            sb.AppendLine("ERROR: Resources.Load returned a different registry instance than " + RegistryPath);
+        }
+        else
+            sb.AppendLine("OK: Resources.Load resolves single registry");
 
         if (registry.SceneFlow == null)
         {
             errors++;
-            sb.AppendLine("ERROR: Registry.SceneFlow missing");
+            sb.AppendLine("ERROR: Registry.SceneFlow missing — assign SceneFlowConfig.");
         }
+        else
+            sb.AppendLine("OK: SceneFlowConfig");
+
         if (registry.GameBalance == null)
         {
             errors++;
-            sb.AppendLine("ERROR: Registry.GameBalance missing");
+            sb.AppendLine("ERROR: Registry.GameBalance missing — assign GameBalanceConfig.");
         }
+        else
+            sb.AppendLine("OK: GameBalanceConfig");
+
         if (registry.MobileQuality == null)
         {
             errors++;
-            sb.AppendLine("ERROR: Registry.MobileQuality missing");
+            sb.AppendLine("ERROR: Registry.MobileQuality missing — assign MobileQualityCatalog.");
+        }
+        else if (registry.MobileQuality.low == null || registry.MobileQuality.mid == null || registry.MobileQuality.high == null)
+        {
+            errors++;
+            sb.AppendLine("ERROR: MobileQuality catalog missing Low/Mid/High profile references.");
         }
         else
-        {
-            if (registry.MobileQuality.low == null || registry.MobileQuality.mid == null || registry.MobileQuality.high == null)
-            {
-                errors++;
-                sb.AppendLine("ERROR: MobileQuality catalog missing Low/Mid/High profile");
-            }
-            else
-                sb.AppendLine("OK: Quality Low/Mid/High");
-        }
+            sb.AppendLine("OK: Quality Low/Mid/High");
 
         if (registry.ActiveAbilities == null)
-            warnings++;
+        {
+            errors++;
+            sb.AppendLine("ERROR: Registry.ActiveAbilities missing — assign ActiveAbilityCatalog.");
+        }
+        else
+            sb.AppendLine("OK: ActiveAbilityCatalog");
+
         if (registry.DefaultWaveTable == null)
-            warnings++;
+        {
+            errors++;
+            sb.AppendLine("ERROR: Registry.DefaultWaveTable missing — assign WaveTable.");
+        }
+        else
+            sb.AppendLine("OK: WaveTable");
+
+        // Guard against duplicated balance/quality/scene configs under Assets/Resources (root).
+        if (AssetDatabase.LoadAssetAtPath<GameBalanceConfig>("Assets/Resources/GameBalanceConfig.asset") != null)
+        {
+            errors++;
+            sb.AppendLine("ERROR: Obsolete Assets/Resources/GameBalanceConfig.asset — delete; use Content/Balance only.");
+        }
+        if (AssetDatabase.LoadAssetAtPath<SceneFlowConfig>("Assets/Resources/SceneFlowConfig.asset") != null)
+        {
+            errors++;
+            sb.AppendLine("ERROR: Obsolete Assets/Resources/SceneFlowConfig.asset — delete; use Content/Config only.");
+        }
+        if (AssetDatabase.LoadAssetAtPath<MobileQualityCatalog>("Assets/Resources/MobileQualityCatalog.asset") != null)
+        {
+            errors++;
+            sb.AppendLine("ERROR: Obsolete Assets/Resources/MobileQualityCatalog.asset — delete; use Content/Quality only.");
+        }
     }
 
     private static void ValidateActiveAbilities(StringBuilder sb, ref int errors, ref int warnings)
@@ -158,7 +221,7 @@ public static class GameContentValidator
             if (string.IsNullOrWhiteSpace(def.id) || def.id == "active_unnamed")
             {
                 errors++;
-                sb.AppendLine("ERROR: Missing id — " + path);
+                sb.AppendLine("ERROR: Missing ability id — " + path);
             }
             else if (!ids.Add(def.id))
             {
@@ -181,7 +244,7 @@ public static class GameContentValidator
             if (def.cooldownSeconds < 0.1f)
             {
                 errors++;
-                sb.AppendLine("ERROR: Invalid cooldown — " + path);
+                sb.AppendLine("ERROR: Invalid cooldown (< 0.1) — " + path);
             }
 
             if (catalog != null && !inCatalog.Contains(def) && def.includedInLaunchPool)
@@ -214,25 +277,25 @@ public static class GameContentValidator
             else if (!ids.Add(def.id))
             {
                 errors++;
-                sb.AppendLine("ERROR: Duplicate enemy id '" + def.id + "'");
+                sb.AppendLine("ERROR: Duplicate enemy id '" + def.id + "' — " + path);
             }
 
             if (def.prefab == null)
             {
                 warnings++;
-                sb.AppendLine("WARN: Missing prefab — " + path);
+                sb.AppendLine("WARN: Missing prefab (OK until M3 wiring) — " + path);
             }
 
             if (def.maxHealth < 1f)
             {
                 errors++;
-                sb.AppendLine("ERROR: Invalid HP — " + path);
+                sb.AppendLine("ERROR: Invalid HP (< 1) — " + path);
             }
 
             if (def.moveSpeed <= 0f)
             {
                 errors++;
-                sb.AppendLine("ERROR: Invalid speed — " + path);
+                sb.AppendLine("ERROR: Invalid speed (<= 0) — " + path);
             }
 
             if (def.behaviorId == EnemyBehaviorId.None)

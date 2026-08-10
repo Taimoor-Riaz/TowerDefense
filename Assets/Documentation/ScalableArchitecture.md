@@ -1,8 +1,9 @@
 # Scalable Architecture Constitution
 
 **Milestone:** Client M1 — Project Foundation & Technical Setup  
-**Status:** Post-M1 hardening — config, save, events, quality consumers, pooling, Addressables foundation  
-**Engine:** Unity 6000.3.x · URP 2D · Android portrait
+**Status:** M1 final cleanup — single registry, events, pooling, Addressables foundation  
+**Engine:** Unity 6000.3.x · URP 2D · Android portrait  
+**Schedule:** 10 working days for M1 foundation
 
 ## Purpose
 
@@ -11,7 +12,7 @@ Make the game **scalable**, **extendable**, and **tunable without code** for con
 ## Golden rules
 
 1. **Config-first** — gameplay numbers, content lists, scene names, and quality settings live in ScriptableObjects under `Assets/Content/`.
-2. **One registry** — `GameConfigRegistry` is the only runtime entry point (`Resources/GameConfigRegistry.asset` references Content assets; do not duplicate balance/quality/scene configs under Resources).
+2. **One registry** — only `Assets/Content/Resources/GameConfigRegistry.asset` (Resources.Load + Content layout). Do not duplicate balance/quality/scene configs under `Assets/Resources/`.
 3. **No new magic numbers in gameplay code** — if a value can be tuned, it belongs in an SO.
 4. **Systems read data** — managers/services consume SO definitions via `GameServices.Instance.Config`.
 5. **Additive scenes only (product path)** — Bootstrap stays loaded; Hub and Battle load/unload additively via `SceneFlowService`. Public API: `LoadHub()`, `LoadBattle()`, `ReloadBattle()`.
@@ -19,14 +20,14 @@ Make the game **scalable**, **extendable**, and **tunable without code** for con
 7. **Mobile tiers** — Low / Mid / High drive FPS + VFX via `MobileQualityRuntime` / `OnQualityChanged` (see [MobileOptimizationChecklist.md](MobileOptimizationChecklist.md)).
 8. **No new direct PlayerPrefs** — use `GameServices.Instance.Save` (`ISaveService`). Legacy Currency/GameOver prefs migrate in M4.
 9. **GameplayEvents for new content** — subscribe to typed `GameplayEvents` instead of coupling new abilities to managers.
-10. **Pool combat FX** — no repeated Instantiate/Destroy in combat; use `PoolService` / specialized pools ([PoolingRules.md](PoolingRules.md)).
+10. **Pool combat FX** — no repeated Instantiate/Destroy in combat; use `PoolService` / specialized pools ([PoolingRules.md](PoolingRules.md)). Enemy pooling deferred to M3.
 11. **Addressables Load → Use → Release** for heavy content ([AddressablesFoundation.md](AddressablesFoundation.md)).
 12. **Validate before Play** — `Game → Foundation → Validate Game Content`.
 
 ## Config access
 
 ```
-GameServices.Instance.Config
+GameServices.Instance.Config   // GameConfigRegistry
   ├── SceneFlow
   ├── GameBalance
   ├── MobileQuality
@@ -34,7 +35,8 @@ GameServices.Instance.Config
   └── DefaultWaveTable
 ```
 
-Edit balance only at `Assets/Content/Balance/GameBalanceConfig.asset`.
+Edit balance only at `Assets/Content/Balance/GameBalanceConfig.asset`.  
+Flow: **GameConfigRegistry → GameBalanceConfig → ManaManager** (not Resources/GameBalanceConfig).
 
 ## Scene flow
 
@@ -55,20 +57,19 @@ API: `LoadHub()`, `LoadBattle()`, `ReloadBattle()`.
 
 ## Gameplay events
 
-Typed publish-only bus: `GameplayEvents` (BattleStarted/Ended, WaveStarted, Enemy*, UnitSummoned/Merged, DamageDealt, BossSpawned, StatusApplied).
-New M2 passives/actives subscribe here.
+Typed publish-only bus: `GameplayEvents` — BattleStarted/Ended (phase-change only), WaveStarted, Enemy*, UnitSummoned / UnitMerged / UnitUpgraded / UnitTransformed, `GameplayDamageEvent`, BossSpawned, StatusApplied (slow/poison/stun).
 
 ## Folder map
 
 ```
 Assets/
-  Content/                 ← designer-editable data (canonical)
-    Config/                ← GameConfigRegistry + SceneFlowConfig
+  Content/
+    Resources/GameConfigRegistry.asset   ← ONLY registry (Resources.Load)
+    Config/SceneFlowConfig.asset
     Balance/, Quality/, Abilities/, Enemies/, Waves/, Units/
-  Resources/
-    GameConfigRegistry.asset   ← ONLY config entry in Resources (refs Content)
-  Script/Core/             ← GameServices, SceneFlow, Save, GameplayEvents, Pool, Addressables
-  Scenes/Bootstrap.unity   ← Build Settings index 0
+  Resources/                             ← audio/VFX helpers only (no duplicate configs)
+  Script/Core/
+  Scenes/Bootstrap.unity                 ← Build Settings index 0
 ```
 
 ## Content change workflow (no code)
@@ -79,23 +80,24 @@ Assets/
 | Active abilities | `Content/Abilities/*` via catalog |
 | Quality FPS/VFX | `Content/Quality/MobileQuality_*` |
 | Scene names | `Content/Config/SceneFlowConfig` |
-| Registry wiring | `Content/Config/GameConfigRegistry` |
+| Registry wiring | `Content/Resources/GameConfigRegistry` |
 
 ## Explicitly deferred
 
 - Filling 6 global actives (M2)
+- Enemy pooling + EnemyDefinition/WaveTable live spawn migration (M3)
 - Enemy behavior components / full progression save JSON (M3–M4)
 - Migrating CurrencyManager Gold/Gems off PlayerPrefs (M4)
 - Remote Addressables CDN
 
 ## Acceptance (architecture)
 
-- [x] GameConfigRegistry single source of truth
-- [x] Summon cost owned by ManaManager only
+- [x] Single GameConfigRegistry under Content/Resources
+- [x] Summon cost owned by ManaManager; resets on BeginBattle
 - [x] ISaveService for new persistence
 - [x] SceneFlow public API simplified
-- [x] GameplayEvents bridged from core raise sites
-- [x] MobileQuality wired to shake / VFX / particles / damage numbers / status + `OnQualityChanged`
-- [x] PoolService + pooling rules for M2
-- [x] Local Addressables groups + `AddressableContent` helper
+- [x] GameplayEvents hardened (battle/damage/status/merge semantics)
+- [x] MobileQuality wired + OnQualityChanged
+- [x] PoolService double-release protection
+- [x] Local Addressables helper + init menu (commit AddressableAssetsData after Unity init)
 - [x] Game Content validator menu

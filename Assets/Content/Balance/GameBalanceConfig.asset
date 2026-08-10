@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 895ba37acde2460580e46b1f216af05e, type: 3}
   m_Name: GameBalanceConfig
   m_EditorClassIdentifier: 
-  startingMana: 130
+  startingMana: 999999
   isolateManaFromWalletWater: 1
   initialSummonCost: 50
   summonCostIncreasePerSummon: 10

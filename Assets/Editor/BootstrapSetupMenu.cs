@@ -9,7 +9,7 @@ using UnityEngine;
 public static class BootstrapSetupMenu
 {
     private const string BootstrapPath = "Assets/Scenes/Bootstrap.unity";
-    private const string RegistryPath = "Assets/Content/Config/GameConfigRegistry.asset";
+    private const string RegistryPath = "Assets/Content/Resources/GameConfigRegistry.asset";
     private const string QualityCatalogPath = "Assets/Content/Quality/MobileQualityCatalog.asset";
 
     [MenuItem("Game/Foundation/Validate Bootstrap Setup")]
@@ -38,8 +38,9 @@ public static class BootstrapSetupMenu
         }
 
         string message =
-            "GameConfigRegistry (Content): OK\n" +
-            "Resources registry: " + (resourcesRegistry != null ? "OK" : "MISSING") + "\n" +
+            "GameConfigRegistry (Content/Resources): OK\n" +
+            "Resources.Load: " + (resourcesRegistry != null ? "OK" : "MISSING") + "\n" +
+            "Same instance: " + (resourcesRegistry == registry ? "YES" : "NO") + "\n" +
             "Balance: " + (registry.GameBalance != null ? "OK" : "MISSING") + "\n" +
             "Hub: " + (config != null ? config.hubSceneName : "?") + "\n" +
             "Battle: " + (config != null ? config.battleSceneName : "?") + "\n" +

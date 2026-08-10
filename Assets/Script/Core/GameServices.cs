@@ -48,7 +48,7 @@ public class GameServices : MonoBehaviour
 
         configRegistry = GameConfigRegistry.LoadDefault();
         if (configRegistry == null)
-            Debug.LogError("[GameServices] Missing GameConfigRegistry. Place Assets/Resources/GameConfigRegistry.asset.");
+            Debug.LogError("[GameServices] Missing GameConfigRegistry. Expected Assets/Content/Resources/GameConfigRegistry.asset.");
     }
 
     private void EnsureChildServices()

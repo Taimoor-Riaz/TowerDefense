@@ -264,17 +264,48 @@ public class Tower : MonoBehaviour
         bool isCritical = UnityEngine.Random.value < effectiveCriticalChance;
         float shotDamage = isCritical ? CurrentDamage * effectiveCriticalMultiplier : CurrentDamage;
         runtimeLastProjectileDamage = shotDamage;
-        bullet.SetTarget(target, shotDamage, ResolveDamageType(), HandleProjectileHit, isCritical, ElementColor);
+        bullet.SetTarget(
+            target,
+            shotDamage,
+            ResolveDamageType(),
+            (hitTarget, dealt) => HandleProjectileHit(hitTarget, dealt, isCritical),
+            isCritical,
+            ElementColor);
         GameAudioManager.PlayUnitAttack(
             attackPresentationOverride != null
                 ? attackPresentationOverride
                 : boardTower != null ? boardTower.UnitData : null);
     }
 
-    private void HandleProjectileHit(Enemy target, float dealtDamage)
+    private void HandleProjectileHit(Enemy target, float dealtDamage, bool wasCritical)
     {
         AttackHit?.Invoke(this, target, dealtDamage);
-        GameplayEvents.RaiseDamageDealt(this, target, dealtDamage);
+
+        UnitData unit = boardTower != null ? boardTower.UnitData : null;
+        GameplayEvents.RaiseDamageDealt(new GameplayDamageEvent
+        {
+            SourceType = GameplayDamageSourceType.Tower,
+            Source = this,
+            SourceId = unit != null ? unit.unitName : name,
+            Target = target,
+            Amount = dealtDamage,
+            DamageType = wasCritical ? EnemyDamageType.Critical : ToEnemyDamageType(ResolveDamageType()),
+            IsCritical = wasCritical
+        });
+    }
+
+    private static EnemyDamageType ToEnemyDamageType(TowerDamageType type)
+    {
+        switch (type)
+        {
+            case TowerDamageType.Fire: return EnemyDamageType.Fire;
+            case TowerDamageType.Frost: return EnemyDamageType.Frost;
+            case TowerDamageType.Poison: return EnemyDamageType.Poison;
+            case TowerDamageType.Nature: return EnemyDamageType.Nature;
+            case TowerDamageType.Lightning: return EnemyDamageType.Lightning;
+            case TowerDamageType.Arcane: return EnemyDamageType.Arcane;
+            default: return EnemyDamageType.Physical;
+        }
     }
 
     public AttackProfile CaptureAttackProfile()

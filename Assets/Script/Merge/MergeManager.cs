@@ -213,6 +213,8 @@ public class MergeManager : MonoBehaviour
         if (GameStatsTracker.Instance != null)
             GameStatsTracker.Instance.AddMerge(upgradedLevel);
 
+        GameplayEvents.RaiseUnitUpgraded(upgradedUnit, upgradedLevel);
+
         UnityEngine.Debug.Log(
             "Light Fairy upgrade success: " + upgradedUnit.unitName + " advanced to Lv" + upgradedLevel +
             " in its original cell.");
@@ -287,6 +289,8 @@ public class MergeManager : MonoBehaviour
 
         if (copiedTower != null)
             copiedTower.TriggerPulseEffect();
+
+        GameplayEvents.RaiseUnitTransformed(copiedUnit, copiedLevel);
 
         UnityEngine.Debug.Log(
             "Shapeshifter copy success: transformed into " + copiedUnit.unitName + " Lv" + copiedLevel +

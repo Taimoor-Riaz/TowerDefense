@@ -2,7 +2,10 @@
 
 | Asset | Role |
 |-------|------|
-| `GameConfigRegistry.asset` | Single source of truth — refs all other configs |
+| `../Resources/GameConfigRegistry.asset` | **Only** registry — refs all other configs (`Resources.Load`) |
 | `SceneFlowConfig.asset` | Hub/Battle scene names |
 
-Runtime loads `Resources/GameConfigRegistry.asset`, which points at these Content assets (and Balance/Quality/Abilities/Waves). Do not copy individual configs into Resources.
+Canonical registry path: `Assets/Content/Resources/GameConfigRegistry.asset`
+
+Do **not** put `GameBalanceConfig`, `SceneFlowConfig`, or `MobileQualityCatalog` under `Assets/Resources/`.
+Do **not** keep a second `GameConfigRegistry` anywhere else.

@@ -408,6 +408,7 @@ public class Enemy : MonoBehaviour
         slowEndTime = Time.time + duration;
         currentMoveSpeed = moveSpeed * (1f - activeSlowPercent);
         combatFeedback?.ShowStatus(EnemyStatusType.Slow, duration, statusIcon);
+        GameplayEvents.RaiseStatusApplied(this, GameplayEvents.StatusSlow);
     }
 
     public void ApplyPoison(float tickDamage, float duration, float tickInterval)
@@ -431,6 +432,7 @@ public class Enemy : MonoBehaviour
             nextPoisonTickTime = Mathf.Min(nextPoisonTickTime, Time.time + poisonTickInterval);
 
         combatFeedback?.ShowStatus(EnemyStatusType.Poison, duration, statusIcon);
+        GameplayEvents.RaiseStatusApplied(this, GameplayEvents.StatusPoison);
     }
 
     public bool TryApplyStun(float duration, Sprite statusIcon = null)
@@ -447,6 +449,7 @@ public class Enemy : MonoBehaviour
         stunEndTime = Time.time + effectiveDuration;
         stunImmunityEndTime = stunEndTime + Mathf.Max(0f, immunityDuration);
         combatFeedback?.ShowStatus(EnemyStatusType.Stun, effectiveDuration, statusIcon);
+        GameplayEvents.RaiseStatusApplied(this, GameplayEvents.StatusStun);
         return true;
     }
 

@@ -1,6 +1,6 @@
-# Pooling Rules (M2 prerequisite)
+# Pooling Rules (M2 / M3 prerequisite)
 
-## Hard rule for combat
+## Hard rule for combat (M2+)
 
 **Do not** `Instantiate` / `Destroy` repeatedly during combat for:
 
@@ -8,7 +8,6 @@
 - Projectile / impact VFX  
 - Damage numbers  
 - Status icons  
-- Enemies (prefer pool when spawning waves)  
 - One-shot audio emitter hosts  
 
 Use Get → use → Release.
@@ -21,7 +20,7 @@ Use Get → use → Release.
 | `FloatingDamagePool` | Damage / mana numbers |
 | `CombatFeedbackBurst` | Hit/death particle bursts |
 | `CombatStatusEffectPool` | Stun/poison visuals |
-| `PoolService` | **New** generic prefab Get/Release for M2 actives |
+| `PoolService` | Generic prefab Get/Release for M2 actives (double-release safe via `PooledInstance.IsInPool`) |
 
 ## PoolService
 
@@ -29,18 +28,27 @@ Use Get → use → Release.
 GameObject fx = PoolService.Get(prefab, position, rotation);
 // ...
 PoolService.Release(fx);
+PoolService.Release(fx); // safe no-op
 ```
 
 Respects `MobileQualityRuntime.MaxConcurrentVfx` and particle budget scale.
 
+## Enemy pooling — deferred to Milestone 3
+
+**Do not** migrate `WaveBossManager` / enemy spawn to `PoolService` in M1/M2.
+
+Current Instantiate/Destroy for enemies may remain until **M3**, when these move together:
+
+- `EnemyDefinition` prefab wiring  
+- `WaveTable` consumption  
+- `WaveBossManager` spawn path  
+- Enemy object pooling  
+
+Documented intentionally so M2 ability work does not invent a half-migration.
+
 ## Mobile quality coupling
 
-Pools/consumers read `MobileQualityRuntime` (updated once on quality change via `MobileQualityService.OnQualityChanged`):
-
-- Screen shake off on Low  
-- Damage numbers / status icons gated  
-- VFX concurrent caps  
-- Particle count scale  
+Pools/consumers read `MobileQualityRuntime` (updated once on quality change via `MobileQualityService.OnQualityChanged`).
 
 ## M2 actives
 
