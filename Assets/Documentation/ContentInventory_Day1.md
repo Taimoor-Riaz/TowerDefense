@@ -1,48 +1,45 @@
-# Content Inventory (Day 1 starter)
+# Content Inventory
 
-Track GDD content vs project assets. Complete naming freeze on **Day 2**.
+Updated **Day 2**.
 
-## Units (GDD 11)
+## Units (GDD 11) — see [NamingMap.md](NamingMap.md)
 
-| GDD name | Project name / prefab | UnitData | Notes |
-|----------|----------------------|----------|-------|
-| Fire Mage | | | |
-| Frost Witch | | | |
-| Gold Spirit | | | |
-| Shapeshifter | | | |
-| Thunder Oracle | Zeus? | | |
-| Stone Guardian | | | |
-| Enchanter | Enchantress? | | |
-| Poison Druid | | | |
-| Light Fairy | | | |
-| Shield Priestess | Princess? | | |
-| Shadow Assassin | Magic Archer? | | |
+| GDD name | Project | UnitData | Status |
+|----------|---------|----------|--------|
+| Fire Mage | Fire Mage | FireMage_Data | Mapped |
+| Frost Witch | Frost Witch | Frost Witch_Data | Mapped |
+| Gold Spirit | Golden Spirit | Golden Spirit_Data | Mapped |
+| Shapeshifter | Shapeshifter | Shapeshifte_Data (typo) | Mapped |
+| Thunder Oracle | Zeus | Zeus_Data | Mapped |
+| Stone Guardian | Stone Guardian | Stone Guardian_Data | Mapped |
+| Enchanter | Enchantress | Enchantress_Data | Mapped |
+| Poison Druid | Poison Druid | Poison Druid_Data (unitName Plague Doctor) | Mapped |
+| Light Fairy | Light_Fairy | Light Fairy_Data | Mapped |
+| Shield Priestess | Princess | Princess_Data | Mapped |
+| Shadow Assassin | Magic Archer | Magic Archer_Data | Mapped |
 
-## Global actives (GDD 8 — all missing as globals today)
+## Global actives
 
-| Ability | Status |
-|---------|--------|
-| Meteor Strike | Missing (M2) |
-| Frost Nova | Missing (M2) |
-| Mana Surge | Missing (M2) |
-| Radiant Cleanse | Missing (M2) |
-| Arcane Overclock | Missing (M2) |
-| Gravity Well | Stretch |
-| Barrier Pulse | Stretch |
-| Execution Sigil | Missing (M2) |
+| Ability | SO stub | Implemented cast |
+|---------|---------|------------------|
+| Meteor Strike | `Content/Abilities/Active_MeteorStrike.asset` | No (M2) |
+| Frost Nova | Active_FrostNova | No |
+| Mana Surge | Active_ManaSurge | No |
+| Radiant Cleanse | Active_RadiantCleanse | No |
+| Arcane Overclock | Active_ArcaneOverclock | No |
+| Execution Sigil | Active_ExecutionSigil | No |
+| Gravity Well / Barrier Pulse | Stretch | — |
 
-## Enemies / bosses
+Catalog: `Content/Abilities/ActiveAbilityCatalog.asset`
 
-See audit feature matrix. Prefabs exist partially; mechanics incomplete. Definitions go under `Assets/Content/Enemies/` and `Waves/` in later milestones.
+## Enemies
 
-## Day 1 foundation checklist
+Normal stubs under `Content/Enemies/`. Prefab links + behaviors = M2+.
 
-- [x] ScalableArchitecture.md
-- [x] MilestoneCrosswalk.md
-- [x] Content folders
-- [x] Core SceneFlow scripts
-- [x] SceneFlowConfig.asset
-- [x] Bootstrap.unity
-- [x] Build Settings: Bootstrap → Main_UI → BattleScene
-- [x] Root README.md
-- [ ] Day 2: NamingMap signed + Option A note + SO templates
+## Foundation checklist
+
+- [x] Day 1: architecture, Bootstrap, SceneFlow, README
+- [x] Day 2: NamingMap, Option A note, AbilityInventory, SO templates + example assets
+- [ ] Day 3: Wire SceneFlow UI, quarantine HeroAbilityButtonController, GameBalanceConfig → ManaManager
+- [ ] Day 4: Mobile quality + Android smoke
+- [ ] Day 5: Acceptance pack

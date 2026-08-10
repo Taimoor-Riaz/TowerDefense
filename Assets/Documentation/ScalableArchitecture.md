@@ -81,5 +81,6 @@ If a balance tweak requires opening a `.cs` file, stop and move the value into C
 - [x] This document exists and is the team rule set
 - [x] Content folders exist (Day 1); SO type templates Day 2
 - [x] Bootstrap + SceneFlowService scaffolding (Day 1); full UI migration Day 3
-- [ ] At least one live tunable driven by SO (Day 3–4)
+- [x] SO templates + example assets (GameBalance, Actives, Enemies, Waves) Day 2
+- [ ] At least one live tunable driven by SO (Day 3 — wire GameBalanceConfig)
 - [ ] Mobile quality profiles apply (Day 4)

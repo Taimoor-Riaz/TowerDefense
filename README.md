@@ -63,7 +63,7 @@ Scene names / bootstrap behaviour: `Assets/Content/Config/SceneFlowConfig.asset`
 ## Milestone 1 status
 
 - **Day 1 (done):** architecture docs, Content folders, Bootstrap + SceneFlow scaffolding, Build Settings, README  
-- **Day 2:** Naming map, Option A note, SO templates  
-- **Day 3:** Wire UI to SceneFlow, quarantine abilities, mana clarity  
+- **Day 2 (done):** [NamingMap](Assets/Documentation/NamingMap.md), [Option A](Assets/Documentation/OptionA_AbilityArchitecture.md), [AbilityInventory](Assets/Documentation/AbilityInventory.md), SO templates + Content stubs (abilities/enemies/waves/balance)  
+- **Day 3:** Wire UI to SceneFlow, quarantine abilities, mana clarity + `GameBalanceConfig`  
 - **Day 4:** Mobile quality tiers + Android smoke  
 - **Day 5:** Acceptance pack  
