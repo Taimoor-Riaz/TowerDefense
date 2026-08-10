@@ -47,23 +47,27 @@ Scene names / bootstrap behaviour: `Assets/Content/Config/SceneFlowConfig.asset`
 | `Assets/Script/Core/SceneFlowConfig.cs` | SO config |
 | `Assets/Script/Core/BootstrapLoader.cs` | Bootstrap entry → load Hub |
 
-## Android build (baseline)
+## Android build (Day 4 baseline)
 
-1. File → Build Settings → Android  
-2. Ensure scenes listed above are enabled  
-3. Player Settings: company/product/bundle id (cleaned in Day 4)  
-4. Build debug APK and smoke: Bootstrap → Hub → (Battle when wired)
+1. **Game → Foundation → Validate Android Player Settings**
+2. File → Build Settings → Android (Development Build for smoke)
+3. Scenes: Bootstrap → Main_UI → BattleScene
+4. Build APK; follow [`Assets/Documentation/Android_BuildSmoke.md`](Assets/Documentation/Android_BuildSmoke.md)
 
-## Product lock (Option A)
+Package: `com.competitivesurvival.mergedefense` · Min SDK 24 · Target SDK 34
 
-- Pre-match: **6 units + 2 global actives**
-- Unit skills: **passives / identity**
-- Tower-selected ability buttons: **non-product** (quarantine Day 3)
+## Mobile quality
+
+Low / Mid / High profiles under `Assets/Content/Quality/`.  
+Service applies FPS + VFX budget flags at boot. See [`MobileOptimizationChecklist.md`](Assets/Documentation/MobileOptimizationChecklist.md).
 
 ## Milestone 1 status
 
 - **Day 1 (done):** architecture docs, Content folders, Bootstrap + SceneFlow scaffolding, Build Settings, README  
-- **Day 2 (done):** [NamingMap](Assets/Documentation/NamingMap.md), [Option A](Assets/Documentation/OptionA_AbilityArchitecture.md), [AbilityInventory](Assets/Documentation/AbilityInventory.md), SO templates + Content stubs (abilities/enemies/waves/balance)  
-- **Day 3 (done):** Additive Hub↔Battle via SceneFlow, quarantine tower-ability binding, `GameBalanceConfig` → ManaManager, Water≠mana  
-- **Day 4:** Mobile quality tiers + Android smoke  
-- **Day 5:** Acceptance pack  
+- **Day 2 (done):** NamingMap, Option A, AbilityInventory, SO templates  
+- **Day 3 (done):** Additive Hub↔Battle, ability quarantine, GameBalanceConfig → ManaManager  
+- **Day 4 (done):** Mobile quality tiers + Android Player Settings baseline + smoke docs  
+- **Day 5 (done):** Acceptance pack — see [`Assets/Documentation/M1_DeliveryIndex.md`](Assets/Documentation/M1_DeliveryIndex.md)
+
+**Milestone 1 engineering delivery is complete.** Remaining for client close-out: NamingMap sign-off + physical Android smoke APK.  
+**Next:** [`M2_Backlog_AbilityCorrection.md`](Assets/Documentation/M2_Backlog_AbilityCorrection.md)  

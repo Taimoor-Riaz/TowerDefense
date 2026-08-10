@@ -41,5 +41,5 @@ Normal stubs under `Content/Enemies/`. Prefab links + behaviors = M2+.
 - [x] Day 1: architecture, Bootstrap, SceneFlow, README
 - [x] Day 2: NamingMap, Option A note, AbilityInventory, SO templates + example assets
 - [x] Day 3: SceneFlow UI wiring, ability quarantine, GameBalanceConfig → ManaManager, Water≠mana ([Day3_SmokeChecklist](Day3_SmokeChecklist.md))
-- [ ] Day 4: Mobile quality + Android smoke
-- [ ] Day 5: Acceptance pack
+- [x] Day 4: Mobile quality Low/Mid/High + Android Player Settings + smoke docs ([MobileOptimizationChecklist](MobileOptimizationChecklist.md), [Android_BuildSmoke](Android_BuildSmoke.md))
+- [x] Day 5: Acceptance pack — [M1_DeliveryIndex](M1_DeliveryIndex.md), checklist, known issues, risks, M2 backlog

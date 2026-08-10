@@ -101,4 +101,6 @@ Other boss prefabs (Infernal Knight, Strom Leviathan, etc.) are prototype art â€
 | Role | Name | Date | Approved |
 |------|------|------|----------|
 | Design / Client | | | [ ] |
-| Engineering lead | | | [ ] |
+| Engineering lead | | Day 5 pack | [x] Ready for client sign-off |
+
+Engineering freeze: use GDD canonical names + IDs from this map for all M2+ content. Folder renames are polish-only.

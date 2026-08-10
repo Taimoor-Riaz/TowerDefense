@@ -9,11 +9,13 @@ public class GameServices : MonoBehaviour
 
     [SerializeField] private SceneFlowConfig sceneFlowConfig;
     [SerializeField] private SceneFlowService sceneFlow;
+    [SerializeField] private MobileQualityService mobileQuality;
 
     private static SceneFlowConfig _pendingConfig;
 
     public SceneFlowConfig SceneFlowConfig => sceneFlowConfig;
     public SceneFlowService SceneFlow => sceneFlow != null ? sceneFlow : SceneFlowService.Instance;
+    public MobileQualityService MobileQuality => mobileQuality != null ? mobileQuality : MobileQualityService.Instance;
 
     private void Awake()
     {
@@ -38,6 +40,12 @@ public class GameServices : MonoBehaviour
 
         if (sceneFlowConfig != null)
             sceneFlow.SetConfig(sceneFlowConfig);
+
+        if (mobileQuality == null)
+            mobileQuality = GetComponent<MobileQualityService>();
+
+        if (mobileQuality == null)
+            mobileQuality = gameObject.AddComponent<MobileQualityService>();
     }
 
     public void ApplyConfig(SceneFlowConfig flowConfig)
