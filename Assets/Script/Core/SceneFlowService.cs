@@ -48,7 +48,8 @@ public class SceneFlowService : MonoBehaviour
 
     public void LoadBattle()
     {
-        StartTransition(LoadBattleRoutine());
+        // Unload hub while in battle to avoid dual EventSystem/AudioListener on mobile.
+        StartTransition(LoadBattleRoutine(unloadHub: true));
     }
 
     public void UnloadBattle()

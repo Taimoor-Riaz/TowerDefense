@@ -29,6 +29,6 @@ All eight GDD globals are **Missing** as loadout actives. Stub SO assets exist u
 
 ## Day 3 quarantine intent
 
-1. Stop `HeroAbilityButtonController` from binding HUD to selected tower (or gate behind `#if` / inspector flag `enablePrototypeTowerBinding = false`).  
+1. ~~Stop `HeroAbilityButtonController` from binding HUD to selected tower~~ **DONE** — `enablePrototypeTowerBinding = false` by default.  
 2. Leave unit passive scripts running.  
 3. HUD buttons remain for M2 global cast wiring.

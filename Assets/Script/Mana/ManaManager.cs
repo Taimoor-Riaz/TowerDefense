@@ -1,47 +1,52 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// In-match mana only. Wallet currencies (Gold/Gems/Water) live in CurrencyManager — do not conflate.
+/// Tunables prefer <see cref="GameBalanceConfig"/> under Assets/Content/Balance (also Resources fallback).
+/// </summary>
 public class ManaManager : MonoBehaviour
 {
     public static ManaManager Instance { get; private set; }
     public static event Action<int> OnManaChanged;
     public static event Action<int> OnSummonCostChanged;
 
-    [Header("Mana Settings")]
+    private const string BalanceResourceName = "GameBalanceConfig";
+
+    [Header("Balance (config-first)")]
+    [SerializeField] private GameBalanceConfig balanceConfig;
+    [Tooltip("When true, values from GameBalanceConfig override the inspector fields below on Awake.")]
+    [SerializeField] private bool applyBalanceConfigOnAwake = true;
+
+    [Header("Mana Settings (fallbacks if no config)")]
     [SerializeField, Min(0)] private int startingMana = 130;
     [SerializeField] private bool useInspectorStartingMana = true;
     [SerializeField] private bool allowRuntimeInspectorManaChanges = true;
     [SerializeField, Min(0)] private int currentMana = 130;
 
-    [Header("Summon Cost Settings")]
+    [Header("Summon Cost Settings (fallbacks)")]
     [SerializeField, Min(0)] private int initialSummonCost = 50;
     [SerializeField, Min(0)] private int summonCostIncrease = 10;
 
+    [Header("Wallet isolation")]
+    [Tooltip("When true, match mana does not read/write CurrencyManager.Water.")]
+    [SerializeField] private bool isolateManaFromWalletWater = true;
+
     public int CurrentMana => currentMana;
     public int CurrentSummonCost { get; private set; }
+    public GameBalanceConfig ActiveBalanceConfig => balanceConfig;
 
     private int lastInspectorMana;
     private bool initialized;
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    private static void Initialize()
-    {
-        // Only initialize in battle scene if needed, or always initialize
-        // But ManaManager should probably be in the scene since it has serialized fields
-    }
-
     private void Awake()
     {
         Instance = this;
+        ResolveBalanceConfig();
+        ApplyBalanceConfig();
 
-        if (useInspectorStartingMana || CurrencyManager.Instance == null)
-        {
-            SetManaInternal(startingMana, false);
-        }
-        else
-        {
-            SetManaInternal(CurrencyManager.Instance.Water, false);
-        }
+        // Match mana is independent of meta wallet Water (Option A / Day 3 clarity).
+        SetManaInternal(startingMana, false);
 
         CurrentSummonCost = initialSummonCost;
 
@@ -50,6 +55,26 @@ public class ManaManager : MonoBehaviour
 
         lastInspectorMana = currentMana;
         initialized = true;
+    }
+
+    private void ResolveBalanceConfig()
+    {
+        if (balanceConfig != null)
+            return;
+
+        balanceConfig = Resources.Load<GameBalanceConfig>(BalanceResourceName);
+    }
+
+    private void ApplyBalanceConfig()
+    {
+        if (!applyBalanceConfigOnAwake || balanceConfig == null)
+            return;
+
+        startingMana = balanceConfig.startingMana;
+        initialSummonCost = balanceConfig.initialSummonCost;
+        summonCostIncrease = balanceConfig.summonCostIncreasePerSummon;
+        isolateManaFromWalletWater = balanceConfig.isolateManaFromWalletWater;
+        useInspectorStartingMana = true;
     }
 
     private void Start()
@@ -114,8 +139,9 @@ public class ManaManager : MonoBehaviour
     {
         currentMana = Mathf.Max(0, amount);
         lastInspectorMana = currentMana;
-        
-        if (CurrencyManager.Instance != null)
+
+        // Intentionally do NOT mirror mana into CurrencyManager.Water when isolated.
+        if (!isolateManaFromWalletWater && CurrencyManager.Instance != null)
             CurrencyManager.Instance.SetWater(currentMana);
 
         if (notify)

@@ -40,6 +40,6 @@ Normal stubs under `Content/Enemies/`. Prefab links + behaviors = M2+.
 
 - [x] Day 1: architecture, Bootstrap, SceneFlow, README
 - [x] Day 2: NamingMap, Option A note, AbilityInventory, SO templates + example assets
-- [ ] Day 3: Wire SceneFlow UI, quarantine HeroAbilityButtonController, GameBalanceConfig → ManaManager
+- [x] Day 3: SceneFlow UI wiring, ability quarantine, GameBalanceConfig → ManaManager, Water≠mana ([Day3_SmokeChecklist](Day3_SmokeChecklist.md))
 - [ ] Day 4: Mobile quality + Android smoke
 - [ ] Day 5: Acceptance pack

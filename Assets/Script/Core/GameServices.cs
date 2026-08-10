@@ -65,6 +65,9 @@ public class GameServices : MonoBehaviour
             return Instance;
         }
 
+        if (fallbackConfig == null)
+            fallbackConfig = Resources.Load<SceneFlowConfig>("SceneFlowConfig");
+
         _pendingConfig = fallbackConfig;
         var go = new GameObject("GameServices (Runtime)");
         return go.AddComponent<GameServices>();

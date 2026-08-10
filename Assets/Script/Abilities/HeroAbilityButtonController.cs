@@ -7,6 +7,10 @@ using UnityEngine.UI;
 
 public sealed class HeroAbilityButtonController : MonoBehaviour
 {
+    [Header("Option A — Product lock")]
+    [Tooltip("NON-PRODUCT. When false (default), Ability/Ability_2 buttons do not bind to the selected tower. Milestone 2 will bind global actives from loadout.")]
+    [SerializeField] private bool enablePrototypeTowerBinding = false;
+
     [SerializeField] private string[] existingButtonObjectNames = { "Ability", "Ability_2" };
 
     [Header("Cooldown Presentation")]
@@ -29,6 +33,7 @@ public sealed class HeroAbilityButtonController : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Bootstrap()
     {
+        // Keep a controller present so buttons stay in a safe non-product state until M2 global cast.
         if (FindFirstObjectByType<HeroAbilityButtonController>() == null)
             new GameObject("Hero Ability Button Controller", typeof(HeroAbilityButtonController));
     }
@@ -44,10 +49,19 @@ public sealed class HeroAbilityButtonController : MonoBehaviour
     {
         ResolveExistingButtons();
         RefreshBindings();
+        if (!enablePrototypeTowerBinding)
+            Debug.Log("[Option A] HeroAbilityButtonController: prototype tower-binding DISABLED. HUD actives await global loadout (M2).");
     }
 
     private void Update()
     {
+        if (!enablePrototypeTowerBinding)
+        {
+            for (int i = 0; i < buttons.Count; i++)
+                UpdateSlotVisual(i);
+            return;
+        }
+
         BoardTower selectedTower = BoardTowerInputController.SelectedAbilityTower;
         if (selectedTower == null || selectedTower.CurrentCell == null)
         {
@@ -121,6 +135,16 @@ public sealed class HeroAbilityButtonController : MonoBehaviour
     {
         if (buttons.Count == 0)
             return;
+
+        if (!enablePrototypeTowerBinding)
+        {
+            for (int slot = 0; slot < buttons.Count; slot++)
+            {
+                bindings[slot] = null;
+                UpdateSlotVisual(slot, true);
+            }
+            return;
+        }
 
         BoardTower selectedTower = BoardTowerInputController.SelectedAbilityTower;
         TowerAbilityBase[] selectedAbilities = selectedTower != null && selectedTower.CurrentCell != null
@@ -197,6 +221,9 @@ public sealed class HeroAbilityButtonController : MonoBehaviour
 
     private void HandlePressed(int index)
     {
+        if (!enablePrototypeTowerBinding)
+            return;
+
         if (index < 0 || index >= bindings.Count)
             return;
 

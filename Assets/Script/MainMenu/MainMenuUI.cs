@@ -14,6 +14,7 @@ public class MainMenuUI : MonoBehaviour
     [Header("Dynamic Text")]
     [SerializeField] private TMP_Text gemsText;
     [SerializeField] private TMP_Text goldText;
+    [Tooltip("Legacy meta wallet display only — NOT in-match mana. Match mana is ManaManager.")]
     [SerializeField] private TMP_Text waterText;
     [SerializeField] private TMP_Text playerNameText;
     [SerializeField] private TMP_Text leagueProgressText;
@@ -269,7 +270,16 @@ public class MainMenuUI : MonoBehaviour
     public void LoadBattleScene()
     {
         Time.timeScale = 1f;
-        Debug.Log("Main Menu: loading BattleScene.");
+        Debug.Log("Main Menu: loading BattleScene (additive SceneFlow).");
+
+        GameServices.EnsureExists();
+        if (SceneFlowService.Instance != null)
+        {
+            SceneFlowService.Instance.LoadBattle();
+            return;
+        }
+
+        // Fallback if Bootstrap/SceneFlow is missing (editor-only convenience).
         SceneManager.LoadScene(battleSceneName);
     }
 

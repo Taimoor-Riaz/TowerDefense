@@ -1,5 +1,10 @@
 using UnityEngine;
 
+/// <summary>
+/// Meta / out-of-match wallet.
+/// Gold &amp; Gems = GDD currencies.
+/// Water = legacy wallet field only — NOT in-match mana (see ManaManager + GameBalanceConfig.isolateManaFromWalletWater).
+/// </summary>
 public class CurrencyManager : MonoBehaviour
 {
     public static CurrencyManager Instance { get; private set; }
@@ -12,11 +17,14 @@ public class CurrencyManager : MonoBehaviour
     [Header("Default Values")]
     [SerializeField] private int defaultGold = 78540;
     [SerializeField] private int defaultGems = 1250;
+    [Tooltip("Legacy meta wallet leftover. Do not treat as battle mana.")]
     [SerializeField] private int defaultWater = 3210;
     [SerializeField] private int defaultSummonCost = 50;
 
     public int Gold { get; private set; }
     public int Gems { get; private set; }
+
+    /// <summary>Legacy meta wallet value. Not in-match mana.</summary>
     public int Water { get; private set; }
     public int SummonCost { get; private set; }
 

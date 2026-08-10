@@ -201,12 +201,26 @@ public class GameOverUI : MonoBehaviour
     private void TryAgain()
     {
         Time.timeScale = 1f;
+        GameServices.EnsureExists();
+        if (SceneFlowService.Instance != null)
+        {
+            SceneFlowService.Instance.ReloadBattle();
+            return;
+        }
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     private void ExitToMenu()
     {
         Time.timeScale = 1f;
+        GameServices.EnsureExists();
+        if (SceneFlowService.Instance != null)
+        {
+            SceneFlowService.Instance.UnloadBattle();
+            return;
+        }
+
         SceneManager.LoadScene("Main_UI");
     }
 }
