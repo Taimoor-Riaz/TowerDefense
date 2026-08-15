@@ -20849,7 +20849,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WaveBossManager
   normalEnemyPrefabs:
   - {fileID: 4724022500809575677, guid: 6c72d493c1bf07349bfbbbc0b4183655, type: 3}
-  bossPrefabs: []
+  - {fileID: 949725129846024509, guid: ef3ffeda2a119684e8e54c3be7302ff8, type: 3}
+  - {fileID: 3757174288214126796, guid: 17d338b86ee3c7041b2a5063c312acb4, type: 3}
+  - {fileID: 6485966060372659865, guid: 9b03a4b9550286c428060192d47868af, type: 3}
+  - {fileID: 6424941069011672838, guid: 54c858efa6af9c54f96d45f485d44ba7, type: 3}
+  bossPrefabs:
+  - {fileID: 949725129846024509, guid: b26481c14829be8408a184161affee93, type: 3}
+  - {fileID: 949725129846024509, guid: 0e29216adf963b84d905ca03d59eb360, type: 3}
+  - {fileID: 949725129846024509, guid: b0926f1739d06a84dba46c1a52b79517, type: 3}
+  - {fileID: 949725129846024509, guid: e3566ff9ab2bbd04baae8071d0f08412, type: 3}
+  - {fileID: 949725129846024509, guid: 8132e8a1beae1ed4e9557b920ffa689f, type: 3}
+  - {fileID: 949725129846024509, guid: 29516690c79219a47b7ea4ae2254b105, type: 3}
+  - {fileID: 949725129846024509, guid: 7ec3daaf2742b234d99c8e5f562fafc3, type: 3}
+  - {fileID: 949725129846024509, guid: 2c60b55d2f059a2499f49e420a13709a, type: 3}
   routes:
   - {fileID: 1079339790}
   - {fileID: 886268519}

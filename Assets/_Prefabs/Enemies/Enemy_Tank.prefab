@@ -124,10 +124,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   enemyId: Enemy_Tank
   maxHealth: 320
-  moveSpeed: 1.6
+  moveSpeed: 1.5
   manaReward: 8
   leakDamage: 1
   isBoss: 0
+  stunImmunityDuration: 0.75
+  bossStunDurationMultiplier: 0.35
+  bossStunImmunityDuration: 2.5
   canSwitchRoute: 1
   checkDistance: 0.1
   switchCooldown: 1
@@ -136,6 +139,9 @@ MonoBehaviour:
     m_Bits: 0
   visual: {fileID: 6349468186080826149}
   rotationOffset: 0
+  runtimeScaledWave: 1
+  runtimeBaseHealth: 0
+  runtimeHealthMultiplier: 1
 --- !u!114 &-3295263573336335990
 MonoBehaviour:
   m_ObjectHideFlags: 0

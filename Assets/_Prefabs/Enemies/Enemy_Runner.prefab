@@ -86,7 +86,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   enemyId: Enemy_Runner
   maxHealth: 65
-  moveSpeed: 1
+  moveSpeed: 1.5
   manaReward: 5
   leakDamage: 1
   isBoss: 0
