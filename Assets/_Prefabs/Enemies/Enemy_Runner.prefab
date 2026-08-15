@@ -86,10 +86,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   enemyId: Enemy_Runner
   maxHealth: 65
-  moveSpeed: 3.2
+  moveSpeed: 1
   manaReward: 5
   leakDamage: 1
   isBoss: 0
+  stunImmunityDuration: 0.75
+  bossStunDurationMultiplier: 0.35
+  bossStunImmunityDuration: 2.5
   canSwitchRoute: 1
   checkDistance: 0.1
   switchCooldown: 1
@@ -98,6 +101,9 @@ MonoBehaviour:
     m_Bits: 0
   visual: {fileID: 6349468186080826149}
   rotationOffset: -90
+  runtimeScaledWave: 1
+  runtimeBaseHealth: 0
+  runtimeHealthMultiplier: 1
 --- !u!114 &-2088278735396767335
 MonoBehaviour:
   m_ObjectHideFlags: 0

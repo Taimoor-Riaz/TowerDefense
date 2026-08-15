@@ -50,6 +50,8 @@ public class BattleTopUI : MonoBehaviour
     private void OnEnable()
     {
         ManaManager.OnManaChanged += HandleManaChanged;
+        if (ManaManager.Instance != null)
+            HandleManaChanged(ManaManager.Instance.CurrentMana);
     }
 
     private void OnDisable()

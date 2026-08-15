@@ -19,6 +19,8 @@ public class TowerBoardCell : MonoBehaviour
     private int lastScreenHeight = -1;
     private float lastCameraOrthographicSize = -1f;
 
+    private int lastGridRevision = int.MinValue;
+
     public bool IsOccupied => currentTower != null;
     public BoardTower CurrentTower => currentTower;
     public Vector3 SpawnPosition => GetSpawnPosition();
@@ -34,6 +36,7 @@ public class TowerBoardCell : MonoBehaviour
     private void Start()
     {
         AlignTransformToCanvasMapGrid();
+        ApplyCellColliderSize();
         SnapCurrentTowerToCell();
     }
 
@@ -43,6 +46,7 @@ public class TowerBoardCell : MonoBehaviour
             return;
 
         AlignTransformToCanvasMapGrid();
+        ApplyCellColliderSize();
 
         Vector3 spawnPosition = SpawnPosition;
 
@@ -159,6 +163,19 @@ public class TowerBoardCell : MonoBehaviour
             transform.position = worldPosition;
     }
 
+    private void ApplyCellColliderSize()
+    {
+        BoardGridLayout gridLayout = BoardGridLayout.FindActive();
+        if (gridLayout == null || !gridLayout.TryGetCellWorldSize(out Vector2 worldSize))
+            return;
+
+        if (!TryGetComponent(out BoxCollider2D boxCollider))
+            return;
+
+        boxCollider.size = worldSize;
+        boxCollider.offset = Vector2.zero;
+    }
+
     private Vector3 GetSpawnPosition()
     {
         if (useCanvasMapGridForSpawn &&
@@ -193,6 +210,7 @@ public class TowerBoardCell : MonoBehaviour
 
         return Screen.width != lastScreenWidth ||
                Screen.height != lastScreenHeight ||
+               lastGridRevision != BoardGridLayout.Revision ||
                !Mathf.Approximately(cameraSize, lastCameraOrthographicSize);
     }
 
@@ -201,6 +219,7 @@ public class TowerBoardCell : MonoBehaviour
         lastScreenWidth = Screen.width;
         lastScreenHeight = Screen.height;
         lastCameraOrthographicSize = GetCameraOrthographicSize();
+        lastGridRevision = BoardGridLayout.Revision;
     }
 
     private static float GetCameraOrthographicSize()

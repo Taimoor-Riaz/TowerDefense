@@ -1,7 +1,12 @@
 # Option A — Ability Architecture
 
 **Status:** Locked (client direction + Day 2 design note)  
-**Product rule:** Pre-match loadout = **6 units + 2 global active abilities**.
+**Product rule (this order):**  
+1. Pre-match **6 units**  
+2. Pre-match **2 global active abilities**  
+3. Ability buttons **independent** of selected tower  
+4. Unit abilities stay **passive / identity**  
+5. Tower-selected ability UX is **not** the product path.
 
 ## Three layers
 

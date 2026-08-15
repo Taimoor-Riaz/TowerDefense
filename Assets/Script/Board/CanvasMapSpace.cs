@@ -11,6 +11,8 @@ public static class CanvasMapSpace
     private const float GameplayPlaneZ = 0f;
     private const int MapSortingOrder = -100;
     private const int HudSortingOrder = 500;
+    private const int FooterBleedSortingOrder = 490;
+    private const int GridSize = 5;
 
     private static readonly float[] GridXNormalized =
     {
@@ -32,38 +34,14 @@ public static class CanvasMapSpace
 
     private static readonly Vector2[] LeftRouteWaypoints =
     {
-        new Vector2(0.4861f, 0.6205f),
-        new Vector2(0.4769f, 0.5809f),
-        new Vector2(0.4343f, 0.5580f),
-        new Vector2(0.3509f, 0.5471f),
-        new Vector2(0.2287f, 0.5476f),
-        new Vector2(0.1861f, 0.5429f),
-        new Vector2(0.1324f, 0.4523f),
-        new Vector2(0.1278f, 0.3643f),
-        new Vector2(0.1278f, 0.2591f),
-        new Vector2(0.1407f, 0.1955f),
-        new Vector2(0.1824f, 0.1533f),
-        new Vector2(0.2907f, 0.1585f),
-        new Vector2(0.4065f, 0.1622f),
-        new Vector2(0.4870f, 0.1289f)
+        new Vector2(0.31f, 0.92f),
+        new Vector2(0.31f, 0.08f)
     };
 
     private static readonly Vector2[] RightRouteWaypoints =
     {
-        new Vector2(0.4907f, 0.6057f),
-        new Vector2(0.4907f, 0.5703f),
-        new Vector2(0.5917f, 0.5490f),
-        new Vector2(0.7306f, 0.5474f),
-        new Vector2(0.8491f, 0.5302f),
-        new Vector2(0.8620f, 0.4479f),
-        new Vector2(0.8602f, 0.3729f),
-        new Vector2(0.8556f, 0.3042f),
-        new Vector2(0.8583f, 0.2432f),
-        new Vector2(0.8398f, 0.1859f),
-        new Vector2(0.7667f, 0.1516f),
-        new Vector2(0.6917f, 0.1547f),
-        new Vector2(0.5250f, 0.1500f),
-        new Vector2(0.5056f, 0.1349f)
+        new Vector2(0.69f, 0.92f),
+        new Vector2(0.69f, 0.08f)
     };
 
     private static int lastCanvasForceUpdateFrame = -1;
@@ -115,14 +93,18 @@ public static class CanvasMapSpace
             return false;
 
         int zeroBasedIndex = cellIndex - 1;
-        int row = zeroBasedIndex / 5;
-        int column = zeroBasedIndex % 5;
+        int row = zeroBasedIndex / GridSize;
+        int column = zeroBasedIndex % GridSize;
 
-        if (row < 0 || row >= GridYNormalizedFromTop.Length ||
-            column < 0 || column >= GridXNormalized.Length)
-        {
+        if (row < 0 || row >= GridSize || column < 0 || column >= GridSize)
             return false;
-        }
+
+        BoardGridLayout gridLayout = BoardGridLayout.FindActive();
+        if (gridLayout != null && gridLayout.TryGetCellWorldPosition(row, column, out worldPosition))
+            return true;
+
+        if (row >= GridYNormalizedFromTop.Length || column >= GridXNormalized.Length)
+            return false;
 
         return TryGetMapNormalizedWorldPosition(
             GridXNormalized[column],
@@ -141,6 +123,11 @@ public static class CanvasMapSpace
             return false;
 
         Vector2 normalizedPosition = routeWaypoints[waypointIndex];
+
+        RectTransform laneRect = FindLaneRect(routeName);
+        if (laneRect != null)
+            return TryGetRectNormalizedWorldPosition(laneRect, 0.5f, normalizedPosition.y, out worldPosition);
+
         return TryGetMapNormalizedWorldPosition(normalizedPosition.x, normalizedPosition.y, out worldPosition);
     }
 
@@ -149,10 +136,14 @@ public static class CanvasMapSpace
         if (source == null)
             return Vector3.zero;
 
-        Canvas sourceCanvas = source.GetComponentInParent<Canvas>();
+        // Route helpers can live under a disabled parent, so inactive ancestors must still resolve the canvas.
+        Canvas sourceCanvas = source.GetComponentInParent<Canvas>(true);
 
         if (sourceCanvas == null)
             return source.position;
+
+        ConfigureMapCanvasForGameplay();
+        ForceCanvasUpdateOncePerFrame();
 
         Camera canvasCamera = GetCanvasCamera(sourceCanvas);
 
@@ -161,22 +152,29 @@ public static class CanvasMapSpace
         return ScreenToGameplayWorld(screenPosition);
     }
 
-    private static bool TryGetMapNormalizedWorldPosition(float normalizedX, float normalizedYFromTop, out Vector3 worldPosition)
+    public static bool TryGetRectNormalizedWorldPosition(
+        RectTransform targetRect,
+        float normalizedX,
+        float normalizedYFromTop,
+        out Vector3 worldPosition)
     {
         worldPosition = Vector3.zero;
 
-        ConfigureMapCanvasForGameplay();
-
-        RectTransform mapRect = FindMapRect();
-        Canvas mapCanvas = FindMapCanvas();
-
-        if (mapRect == null || mapCanvas == null)
+        if (targetRect == null)
             return false;
 
+        ConfigureMapCanvasForGameplay();
         ForceCanvasUpdateOncePerFrame();
 
+        Canvas mapCanvas = targetRect.GetComponentInParent<Canvas>();
+        if (mapCanvas == null)
+            mapCanvas = FindMapCanvas();
+
+        if (mapCanvas == null)
+            return false;
+
         Vector3[] corners = new Vector3[4];
-        mapRect.GetWorldCorners(corners);
+        targetRect.GetWorldCorners(corners);
 
         Camera canvasCamera = GetCanvasCamera(mapCanvas);
 
@@ -190,6 +188,11 @@ public static class CanvasMapSpace
 
         worldPosition = ScreenToGameplayWorld(screenPosition);
         return true;
+    }
+
+    private static bool TryGetMapNormalizedWorldPosition(float normalizedX, float normalizedYFromTop, out Vector3 worldPosition)
+    {
+        return TryGetRectNormalizedWorldPosition(FindMapRect(), normalizedX, normalizedYFromTop, out worldPosition);
     }
 
     private static void ConfigureForegroundUi(Canvas mapCanvas, RectTransform mapRect)
@@ -206,6 +209,12 @@ public static class CanvasMapSpace
             if (child == null || child == mapRect || child.GetComponent<RectTransform>() == null)
                 continue;
 
+            if (child.name == "BottomUIRoot")
+            {
+                ConfigureForegroundCanvas(child.gameObject, FooterBleedSortingOrder, addRaycaster: false);
+                continue;
+            }
+
             ConfigureForegroundCanvas(child.gameObject, HudSortingOrder);
         }
 
@@ -216,7 +225,7 @@ public static class CanvasMapSpace
         ConfigureForegroundCanvas(mapRect.Find("WavePopup")?.gameObject, HudSortingOrder + 20);
     }
 
-    private static void ConfigureForegroundCanvas(GameObject target, int sortingOrder)
+    private static void ConfigureForegroundCanvas(GameObject target, int sortingOrder, bool addRaycaster = true)
     {
         if (target == null)
             return;
@@ -228,6 +237,9 @@ public static class CanvasMapSpace
         canvas.overrideSorting = true;
         canvas.sortingLayerName = GameplaySortingLayerName;
         canvas.sortingOrder = sortingOrder;
+
+        if (!addRaycaster)
+            return;
 
         if (target.GetComponent<GraphicRaycaster>() == null)
             target.AddComponent<GraphicRaycaster>();
@@ -287,6 +299,19 @@ public static class CanvasMapSpace
     {
         GameObject mapObject = GameObject.Find(MapRectName);
         return mapObject != null ? mapObject.GetComponent<RectTransform>() : null;
+    }
+
+    private static RectTransform FindLaneRect(string routeName)
+    {
+        if (string.IsNullOrWhiteSpace(routeName))
+            return null;
+
+        string laneName = routeName.IndexOf("left", StringComparison.OrdinalIgnoreCase) >= 0
+            ? "Arena_LaneLeft"
+            : "Arena_LaneRight";
+
+        GameObject laneObject = GameObject.Find(laneName);
+        return laneObject != null ? laneObject.GetComponent<RectTransform>() : null;
     }
 
     private static Camera GetCanvasCamera(Canvas canvas)

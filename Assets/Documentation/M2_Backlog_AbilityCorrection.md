@@ -1,7 +1,8 @@
 # Client Milestone 2 Backlog — Ability System Correction
 
-**Depends on:** Milestone 1 foundation (done) + Priority 2 (quality consumers, pooling, Addressables, content validator)  
-**Maps to:** Audit M1 / Phase 2 — Ability system correction  
+**Depends on:** Milestone 1 foundation + remaining M1 Arena/HUD close-out  
+**Maps to:** Client M2 (15 days) — 6-unit deck + 2 global actives  
+**GUI:** Deck Building PNGs in `Assets/GUI` are for this milestone, not M1.  
 **Rule:** All new content goes into `Assets/Content/` ScriptableObjects. No new magic numbers in cast code.  
 **M2 hard rules:** Spawn ability/impact VFX via `AbilityVfxPool` or `PoolService` only. Heavy assets via Addressables Load→Release. Respect `MobileQualityRuntime`.
 

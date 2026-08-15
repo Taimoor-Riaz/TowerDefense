@@ -16,15 +16,24 @@ public class EnemyRoute : MonoBehaviour
         RefreshWaypoints();
     }
 
+    /// <summary>
+    /// Spawn is index 0, exit is the last index. The scene Transforms drive these positions so
+    /// moving a waypoint in the editor moves where enemies appear and leak.
+    /// </summary>
     public Vector3 GetWaypointPosition(int index)
     {
-        if (waypoints == null || index < 0 || index >= waypoints.Length || waypoints[index] == null)
+        if (waypoints == null || index < 0 || index >= waypoints.Length)
             return transform.position;
+
+        Transform waypoint = waypoints[index];
+
+        if (waypoint != null)
+            return CanvasMapSpace.TransformToGameplayWorld(waypoint);
 
         if (CanvasMapSpace.TryGetRouteWaypointWorldPosition(gameObject.name, index, out Vector3 normalizedPosition))
             return normalizedPosition;
 
-        return CanvasMapSpace.TransformToGameplayWorld(waypoints[index]);
+        return transform.position;
     }
 
     private void OnValidate()

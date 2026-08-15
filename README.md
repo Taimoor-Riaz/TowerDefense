@@ -1,79 +1,64 @@
 # Competitive Survival Merge Defense
 
-Unity **6000.3.10f1** · URP 2D · Android portrait tower-defense / merge survival MVP.
+Unity **6000.3.10f1** · URP 2D · **Android portrait** MVP (iOS is not in current MVP acceptance).
 
 ## Open the project
 
 1. Install Unity Hub + Editor **6000.3.10f1** (see `ProjectSettings/ProjectVersion.txt`).
 2. Open this folder as a Unity project.
-3. Wait for script compile / URP import.
+3. Wait for script compile / URP import (including `Assets/GUI/`).
 
 ## Play mode (correct entry)
 
 **Always start from `Assets/Scenes/Bootstrap.unity`** (Build Settings index 0).
 
-Flow:
-
 1. `Bootstrap` — persistent `GameServices` + `SceneFlowService`
 2. Loads **`Main_UI`** additively (hub)
 3. Battle loads **`BattleScene`** additively via SceneFlow (hub unloads)
 
-Build Settings order:
+Build Settings: Bootstrap → Main_UI → BattleScene.
 
-0. `Assets/Scenes/Bootstrap.unity`
-1. `Assets/Scenes/Main_UI.unity`
-2. `Assets/Scenes/BattleScene.unity`
+Player builds must use SceneFlow. Editor may open Hub/Battle alone for art.
 
-Editor convenience: you can still open `Main_UI` / `BattleScene` alone for art work; product path is Bootstrap-first. Player builds require SceneFlow.
-
-## Architecture (config-first)
-
-See:
+## Architecture
 
 - [`Assets/Documentation/ScalableArchitecture.md`](Assets/Documentation/ScalableArchitecture.md)
-- [`Assets/Documentation/MilestoneCrosswalk.md`](Assets/Documentation/MilestoneCrosswalk.md)
-- [`Assets/Documentation/PoolingRules.md`](Assets/Documentation/PoolingRules.md)
-- [`Assets/Documentation/AddressablesFoundation.md`](Assets/Documentation/AddressablesFoundation.md)
+- [`Assets/Documentation/MilestoneCrosswalk.md`](Assets/Documentation/MilestoneCrosswalk.md) — 10/15/15/10/10 days, delivery pack, Option A
+- [`Assets/Documentation/M1_AssetReview.md`](Assets/Documentation/M1_AssetReview.md) — client GUI pack
 
 **Single registry:** `Assets/Content/Resources/GameConfigRegistry.asset`  
 Flow: `GameConfigRegistry` → `GameBalanceConfig` → `ManaManager`
 
-Content lives under `Assets/Content/` (balance, quality, abilities, enemies, waves, config).  
-Scene names: `Assets/Content/Config/SceneFlowConfig.asset`.
-
 Validate: **Game → Foundation → Validate Game Content**
 
-## Core scripts
+## Client GUI
 
-| Script | Role |
-|--------|------|
-| `Assets/Script/Core/GameServices.cs` | DontDestroy root |
-| `Assets/Script/Core/GameConfigRegistry.cs` | Config entry |
-| `Assets/Script/Core/SceneFlowService.cs` | Additive Hub/Battle load-unload |
-| `Assets/Script/Core/BootstrapLoader.cs` | Bootstrap entry → load Hub |
-| `Assets/Script/Core/GameplayEvents.cs` | Typed event bus |
-| `Assets/Script/Core/PoolService.cs` | Generic VFX pool (M2+) |
+Drop: `Assets/GUI/Screens - Main Menu, Battle HUD, Editor/`  
+**M1:** Gameplay HUD + Arena only (Days 2–4).  
+**Later:** Main Menu / Deck / Victory-Defeat.
 
-## Android build
+## Android
+
+Package: `com.competitivesurvival.mergedefense` · Min SDK **25** · Target SDK 34 · Portrait
 
 1. **Game → Foundation → Validate Android Player Settings**
-2. File → Build Settings → Android (Development Build for smoke)
-3. Scenes: Bootstrap → Main_UI → BattleScene
-4. Build APK; follow [`Assets/Documentation/Android_BuildSmoke.md`](Assets/Documentation/Android_BuildSmoke.md) on a **physical device**
-
-Package: `com.competitivesurvival.mergedefense` · Min SDK 24 · Target SDK 34
-
-## Mobile quality
-
-Low / Mid / High profiles under `Assets/Content/Quality/`.  
-See [`MobileOptimizationChecklist.md`](Assets/Documentation/MobileOptimizationChecklist.md).
+2. Build APK → `Build_Apk/MergeDefense_M1.apk` (gitignored)
+3. Physical device: [`Android_BuildSmoke.md`](Assets/Documentation/Android_BuildSmoke.md)
 
 ## Milestone 1 status
 
-M1 foundation engineering (10 working days schedule) is complete pending:
+Foundation architecture is in. Close-out Days 1–5 docs are done; device APK remains developer-owned.
 
-- Editor smoke from Bootstrap
-- Physical Android smoke
-- Addressables: run **Initialize Addressables Groups** once and commit `Assets/AddressableAssetsData/`
+| Day | Work |
+|-----|------|
+| 1 (done) | Contract docs + GUI import |
+| 2 (done) | Arena sprites on BattleScene |
+| 3 (done) | Battle HUD / footer chrome |
+| 4 (done) | Safe area + board/spawn/end |
+| 5 (docs done) | Changelog + QA pack; **you** build APK + device smoke |
 
-**Next:** [`M2_Backlog_AbilityCorrection.md`](Assets/Documentation/M2_Backlog_AbilityCorrection.md)
+**Daily gate:** Bootstrap → Hub → Battle → summon/merge/combat still work.
+
+**Changelog:** [`CHANGELOG.md`](CHANGELOG.md)
+
+**Next after M1 accepted:** [`M2_Backlog_AbilityCorrection.md`](Assets/Documentation/M2_Backlog_AbilityCorrection.md)

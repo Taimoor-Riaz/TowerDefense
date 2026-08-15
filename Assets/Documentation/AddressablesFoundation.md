@@ -10,7 +10,7 @@ Package: `com.unity.addressables` (in `Packages/manifest.json`).
 3. Commit generated `Assets/AddressableAssetsData/` (settings + groups).  
 4. Groups (local build/load paths): Core, Units, Abilities, Enemies, Bosses, VFX, Audio, UI  
 
-If `AddressableAssetsData` is missing, M2/M3 heavy content must not be marked Addressable yet — run the menu first.
+If `AddressableAssetsData` already exists (it does), skip Initialize. Groups stay empty until M2/M3 heavy content.
 
 ## Runtime API
 

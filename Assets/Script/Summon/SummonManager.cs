@@ -160,13 +160,10 @@ public class SummonManager : MonoBehaviour
             return;
         }
 
-        if (BattleTopUI.Instance != null)
+        if (!TrySpendSummonMana(cost))
         {
-            if (!BattleTopUI.Instance.SpendMana(cost))
-            {
-                UnityEngine.Debug.Log("Summon blocked: not enough mana.");
-                return;
-            }
+            UnityEngine.Debug.Log("Summon blocked: not enough mana.");
+            return;
         }
 
         UnitData randomUnit = selectedDeckUnits[UnityEngine.Random.Range(0, selectedDeckUnits.Length)];
@@ -176,8 +173,7 @@ public class SummonManager : MonoBehaviour
 
         if (prefab == null)
         {
-            if (BattleTopUI.Instance != null)
-                BattleTopUI.Instance.AddMana(cost);
+            RefundSummonMana(cost);
             UnityEngine.Debug.LogWarning("Summon failed: prefab missing for " + randomUnit.unitName);
             return;
         }
@@ -186,8 +182,7 @@ public class SummonManager : MonoBehaviour
 
         if (!placed)
         {
-            if (BattleTopUI.Instance != null)
-                BattleTopUI.Instance.AddMana(cost);
+            RefundSummonMana(cost);
             UnityEngine.Debug.LogWarning("Summon failed: selected cell could not place tower.");
             return;
         }
@@ -207,6 +202,25 @@ public class SummonManager : MonoBehaviour
             currentSummonCost += summonCostIncrease;
             RefreshSummonButtonText();
         }
+    }
+
+    private static bool TrySpendSummonMana(int cost)
+    {
+        if (ManaManager.Instance != null)
+            return ManaManager.Instance.SpendMana(cost);
+
+        if (BattleTopUI.Instance != null)
+            return BattleTopUI.Instance.SpendMana(cost);
+
+        return false;
+    }
+
+    private static void RefundSummonMana(int cost)
+    {
+        if (ManaManager.Instance != null)
+            ManaManager.Instance.AddMana(cost);
+        else if (BattleTopUI.Instance != null)
+            BattleTopUI.Instance.AddMana(cost);
     }
 
     private List<TowerBoardCell> GetEmptyCells()

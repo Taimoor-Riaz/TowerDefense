@@ -15,6 +15,10 @@ public class MobileCanvasAdapter : MonoBehaviour
     public bool applySafeArea = true;
     public RectTransform[] safeAreaRoots;
 
+    [Header("Bottom Bleed")]
+    [Tooltip("Bottom-anchored footers that stay on the physical screen bottom and grow by the home-indicator inset.")]
+    public RectTransform[] bottomBleedRoots;
+
     [Header("Full Screen Visuals")]
     public bool stretchFullScreenRects = true;
     public RectTransform[] fullScreenRects;
@@ -22,6 +26,7 @@ public class MobileCanvasAdapter : MonoBehaviour
     private CanvasScaler canvasScaler;
     private Rect lastSafeArea;
     private Vector2Int lastScreenSize;
+    private float[] bottomBleedBaseHeights;
 
     private void Awake()
     {
@@ -59,6 +64,7 @@ public class MobileCanvasAdapter : MonoBehaviour
 
         ConfigureCanvasScaler();
         ApplySafeArea(safeArea);
+        ApplyBottomBleed(safeArea);
         StretchFullScreenRects(safeArea);
     }
 
@@ -151,6 +157,56 @@ public class MobileCanvasAdapter : MonoBehaviour
                 Mathf.Lerp(anchorMin.x, anchorMax.x, origMax.x),
                 Mathf.Lerp(anchorMin.y, anchorMax.y, origMax.y)
             );
+        }
+    }
+
+    private void ApplyBottomBleed(Rect safeArea)
+    {
+        if (bottomBleedRoots == null || bottomBleedRoots.Length == 0)
+            return;
+
+        CaptureBottomBleedBaseHeights();
+
+        float scaleFactor = 1f;
+        Canvas canvas = GetComponent<Canvas>();
+        if (canvas != null && canvas.scaleFactor > 0.0001f)
+            scaleFactor = canvas.scaleFactor;
+
+        float bottomInsetUnits = Mathf.Max(0f, safeArea.yMin) / scaleFactor;
+
+        for (int i = 0; i < bottomBleedRoots.Length; i++)
+        {
+            RectTransform root = bottomBleedRoots[i];
+            if (root == null)
+                continue;
+
+            float baseHeight = bottomBleedBaseHeights != null && i < bottomBleedBaseHeights.Length
+                ? bottomBleedBaseHeights[i]
+                : root.sizeDelta.y;
+
+            Vector2 sizeDelta = root.sizeDelta;
+            sizeDelta.y = baseHeight + bottomInsetUnits;
+            root.sizeDelta = sizeDelta;
+            root.anchorMin = new Vector2(0f, 0f);
+            root.anchorMax = new Vector2(1f, 0f);
+            root.pivot = new Vector2(0.5f, 0f);
+            root.anchoredPosition = new Vector2(root.anchoredPosition.x, 0f);
+        }
+    }
+
+    private void CaptureBottomBleedBaseHeights()
+    {
+        if (bottomBleedRoots == null)
+            return;
+
+        if (bottomBleedBaseHeights != null && bottomBleedBaseHeights.Length == bottomBleedRoots.Length)
+            return;
+
+        bottomBleedBaseHeights = new float[bottomBleedRoots.Length];
+        for (int i = 0; i < bottomBleedRoots.Length; i++)
+        {
+            RectTransform root = bottomBleedRoots[i];
+            bottomBleedBaseHeights[i] = root != null ? root.sizeDelta.y : 0f;
         }
     }
 

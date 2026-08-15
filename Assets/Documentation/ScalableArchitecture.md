@@ -1,9 +1,9 @@
 # Scalable Architecture Constitution
 
 **Milestone:** Client M1 — Project Foundation & Technical Setup  
-**Status:** M1 final cleanup — single registry, events, pooling, Addressables foundation  
-**Engine:** Unity 6000.3.x · URP 2D · Android portrait  
-**Schedule:** 10 working days for M1 foundation
+**Status:** M1 remaining close-out — GUI pack imported; Arena/HUD swap Days 2–4  
+**Engine:** Unity 6000.3.x · URP 2D · **Android portrait** (iOS not in MVP)  
+**Schedule:** 10 working days M1 (architecture done; 5 days remaining)
 
 ## Purpose
 
@@ -16,7 +16,7 @@ Make the game **scalable**, **extendable**, and **tunable without code** for con
 3. **No new magic numbers in gameplay code** — if a value can be tuned, it belongs in an SO.
 4. **Systems read data** — managers/services consume SO definitions via `GameServices.Instance.Config`.
 5. **Additive scenes only (product path)** — Bootstrap stays loaded; Hub and Battle load/unload additively via `SceneFlowService`. Public API: `LoadHub()`, `LoadBattle()`, `ReloadBattle()`.
-6. **Option A ability model** — 2 global actives from pre-match loadout; unit skills are passives/identity.
+6. **Option A** — in this order: 6 units pre-match, 2 global actives pre-match, HUD buttons independent of selected tower, unit skills passive/identity, tower-selected ability UX is not the product path.
 7. **Mobile tiers** — Low / Mid / High drive FPS + VFX via `MobileQualityRuntime` / `OnQualityChanged` (see [MobileOptimizationChecklist.md](MobileOptimizationChecklist.md)).
 8. **No new direct PlayerPrefs** — use `GameServices.Instance.Save` (`ISaveService`). Legacy Currency/GameOver prefs migrate in M4.
 9. **GameplayEvents for new content** — subscribe to typed `GameplayEvents` instead of coupling new abilities to managers.
@@ -64,12 +64,12 @@ Typed publish-only bus: `GameplayEvents` — BattleStarted/Ended (phase-change o
 ```
 Assets/
   Content/
-    Resources/GameConfigRegistry.asset   ← ONLY registry (Resources.Load)
-    Config/SceneFlowConfig.asset
-    Balance/, Quality/, Abilities/, Enemies/, Waves/, Units/
-  Resources/                             ← audio/VFX helpers only (no duplicate configs)
+    Resources/GameConfigRegistry.asset
+    Config/, Balance/, Quality/, Abilities/, Enemies/, Waves/, Units/
+  GUI/                                 ← client screen pack (M1 uses Gameplay_HUD only)
+  Resources/                           ← audio/VFX helpers only
   Script/Core/
-  Scenes/Bootstrap.unity                 ← Build Settings index 0
+  Scenes/Bootstrap.unity
 ```
 
 ## Content change workflow (no code)
@@ -85,6 +85,7 @@ Assets/
 ## Explicitly deferred
 
 - Filling 6 global actives (M2)
+- Main Menu / Deck / Victory GUI from `Assets/GUI` (M2/M4)
 - Enemy pooling + EnemyDefinition/WaveTable live spawn migration (M3)
 - Enemy behavior components / full progression save JSON (M3–M4)
 - Migrating CurrencyManager Gold/Gems off PlayerPrefs (M4)
@@ -99,5 +100,7 @@ Assets/
 - [x] GameplayEvents hardened (battle/damage/status/merge semantics)
 - [x] MobileQuality wired + OnQualityChanged
 - [x] PoolService double-release protection
-- [x] Local Addressables helper + init menu (commit AddressableAssetsData after Unity init)
+- [x] Local Addressables helper + groups folder (empty groups OK)
 - [x] Game Content validator menu
+- [ ] Arena / Battle HUD from `Assets/GUI` Gameplay_HUD (Days 2–3)
+- [ ] Per-milestone changelog + Android APK (Day 5 + developer)

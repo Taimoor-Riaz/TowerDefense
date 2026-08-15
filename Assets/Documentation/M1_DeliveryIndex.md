@@ -35,7 +35,19 @@
 | Addressables foundation | `AddressablesFoundation.md` |
 | Mobile checklist | `MobileOptimizationChecklist.md` |
 | Android smoke | `Android_BuildSmoke.md` |
+| GUI asset review (Day 1) | `M1_AssetReview.md` |
+| Final QA checklist | `M1_FinalQAChecklist.md` |
 | Root README | `/README.md` |
+
+## Remaining close-out (5 days)
+
+| Day | Status |
+|-----|--------|
+| 1 Contract docs + GUI import | **Done** — no Battle HUD swap |
+| 2 Arena sprites | **Done** — HUD buttons still old |
+| 3 Battle HUD sprites | **Done** — summon/ability wiring unchanged |
+| 4 Safe area + board | **Done** — `BattleSafeAreaRoot` / `GameOverSafeAreaRoot`; spawn/exit use route Transforms |
+| 5 Changelog + APK (developer) | **Docs done** — changelog in repo root; APK + device smoke remain developer-owned |
 
 ## Final cleanup (pre-M2)
 

@@ -91,10 +91,10 @@ public sealed class GoldSpiritAbility : TowerAbilityBase
 
         int grantedAmount = 0;
 
-        if (BattleTopUI.Instance != null)
-            grantedAmount = BattleTopUI.Instance.AddManaCapped(requestedAmount, maximumMana);
-        else if (ManaManager.Instance != null)
+        if (ManaManager.Instance != null)
             grantedAmount = ManaManager.Instance.AddManaCapped(requestedAmount, maximumMana);
+        else if (BattleTopUI.Instance != null)
+            grantedAmount = BattleTopUI.Instance.AddManaCapped(requestedAmount, maximumMana);
 
         if (grantedAmount <= 0)
             return false;
@@ -107,9 +107,11 @@ public sealed class GoldSpiritAbility : TowerAbilityBase
         Vector3 characterTop = AbilityVisualSizing.GetEffectAnchor(BoardTower, transform, 1f);
         Vector3 orbStart = characterTop + orbSpawnOffset * characterScale;
         Vector3 textPosition = characterTop + textSpawnOffset * characterScale;
-        Vector3 target = BattleTopUI.Instance != null
-            ? BattleTopUI.Instance.GetManaVfxWorldPosition(orbStart + Vector3.up * 3f)
-            : orbStart + Vector3.up * 3f;
+        Vector3 target = ManaHudUI.Instance != null
+            ? ManaHudUI.Instance.GetManaVfxWorldPosition(orbStart + Vector3.up * 3f)
+            : BattleTopUI.Instance != null
+                ? BattleTopUI.Instance.GetManaVfxWorldPosition(orbStart + Vector3.up * 3f)
+                : orbStart + Vector3.up * 3f;
 
         ManaOrbVfx orb = AbilityVfxPool.Spawn(manaOrbPrefab, orbStart, Quaternion.identity);
         orb?.Play(orbStart, target, manaColor, orbTravelDuration, characterScale * orbScaleRelativeToCharacter);

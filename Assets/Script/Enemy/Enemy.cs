@@ -513,11 +513,16 @@ public class Enemy : MonoBehaviour
         isDead = true;
         combatFeedback?.PlayDeath();
 
-        if (BattleTopUI.Instance != null)
+        if (manaReward > 0)
         {
-            BattleTopUI.Instance.AddEnemyKill();
-            BattleTopUI.Instance.AddMana(manaReward);
+            if (ManaManager.Instance != null)
+                ManaManager.Instance.AddMana(manaReward);
+            else if (BattleTopUI.Instance != null)
+                BattleTopUI.Instance.AddMana(manaReward);
         }
+
+        if (BattleTopUI.Instance != null)
+            BattleTopUI.Instance.AddEnemyKill();
 
         if (GameStatsTracker.Instance != null)
         {

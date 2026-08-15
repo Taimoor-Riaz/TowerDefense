@@ -113,6 +113,9 @@ public class ManaManager : MonoBehaviour
 
     public void AddMana(int amount)
     {
+        if (amount <= 0)
+            return;
+
         SetMana(currentMana + amount);
     }
 
